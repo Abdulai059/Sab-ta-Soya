@@ -2,80 +2,105 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Brand Colors ── */
+  --brand-primary: #d5f6e5;
+  --brand-soft: #d5f6e5;
+  --brand-muted: #f4fdf8;
+  --brand-accent: #fdc700;
+  --brand-highlight: #e7f68f;
+  --brand-soft-highlight: #e7f68f;
+
+  /* ── Status / Role Colors ── */
+  --status-danger: #ef4444;
+  --status-info: #14b8a6;
+  --status-warning: #facc15;
+
+  /* ── Surface Colors ── */
+  --surface-page: #ffffff;
+  --surface-raised: #f9fafb;
+  --surface-sunken: #f3f4f6;
+  --surface-overlay: #e5e7eb;
+
+  /* ── Text Colors ── */
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --text-inverted: #ffffff;
+
+  /* ── Border Colors ── */
+  --border-default: #e5e7eb;
+  --border-strong: #d1d5db;
+  --border-subtle: #f3f4f6;
+
+  /* ── Interactive ── */
+  --interactive-default: #2563eb;
+  --interactive-hover: #1e40af;
+
+  /* ── Dark UI ── */
+  --dark-bg: #171717;
+  --dark-surface: #262626;
+  --dark-raised: #2f2f2f;
+  --dark-text: #ededed;
+  --dark-muted: #d4d4d4;
 }
 
+/* Tailwind v4 Theme Tokens */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand */
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-muted: var(--brand-muted);
+  --color-brand-highlight: var(--brand-highlight);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-soft-highlight: var(--brand-soft-highlight);
+
+  /* Status */
+  --color-status-danger: var(--status-danger);
+  --color-status-info: var(--status-info);
+  --color-status-warning: var(--status-warning);
+
+  /* Surface */
+  --color-surface-page: var(--surface-page);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
+
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverted: var(--text-inverted);
+
+  /* Borders */
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-subtle: var(--border-subtle);
+
+  /* Interactive */
+  --color-interactive-default: var(--interactive-default);
+  --color-interactive-hover: var(--interactive-hover);
+
+  /* Dark */
+  --color-dark-bg: var(--dark-bg);
+  --color-dark-surface: var(--dark-surface);
+  --color-dark-raised: var(--dark-raised);
+  --color-dark-text: var(--dark-text);
+  --color-dark-muted: var(--dark-muted);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --surface-page: #0a0a0a;
+    --text-primary: #ededed;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* ─── Leaflet tooltip style override ─── */
-.leaflet-tooltip.sanitrack-tooltip {
-  background: white;
-  border: 1px solid #e7e5e4;
-  border-radius: 8px;
-  padding: 9px 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-  font-family: "DM Sans", sans-serif;
-}
-
-.leaflet-tooltip.sanitrack-tooltip::before {
-  border-top-color: #e7e5e4 !important;
-}
-
-/* ─── Leaflet zoom control ─── */
-.leaflet-control-zoom {
-  border: 1px solid #e7e5e4 !important;
-  border-radius: 8px !important;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07) !important;
-}
-.leaflet-control-zoom-in,
-.leaflet-control-zoom-out {
-  font-family: "DM Sans", sans-serif !important;
-  color: #57534e !important;
-  font-size: 16px !important;
-  line-height: 28px !important;
-  width: 30px !important;
-  height: 30px !important;
-}
-.leaflet-control-zoom-in:hover,
-.leaflet-control-zoom-out:hover {
-  background: #f5f5f4 !important;
-  color: #1c1917 !important;
-}
-
-/* ─── Thin scrollbar ─── */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #d6d3d1;
-  border-radius: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* Topbar height */
-header.h-13 {
-  height: 52px;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), "DM Sans", sans-serif;
 }
