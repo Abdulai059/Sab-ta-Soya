@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { id: "map", label: "Map", icon: Map },
-  { id: "reports", label: "Reports", icon: ClipboardList },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "settings", label: "Settings", icon: Settings },
+  { id: "map", label: "Map", icon: Map, href: "/maps" },
+  { id: "reports", label: "Reports", icon: ClipboardList, href: "/reports" },
+  { id: "analytics", label: "Analytics", icon: BarChart3, href: "/analytics" },
+  { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
 ];
 
 const ROLE_COLORS = {
@@ -69,13 +69,14 @@ export default function Topbar({ activeNav, onNavChange }) {
 
             {/* NAVIGATION */}
             <nav className="hidden md:flex items-center gap-1">
-              {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+              {NAV_ITEMS.map(({ id, label, icon: Icon, href }) => {
                 const active = activeNav === id;
 
                 return (
-                  <button
+                  <Link
                     key={id}
-                    onClick={() => onNavChange(id)}
+                    href={href}
+                    onClick={() => onNavChange?.(id)}
                     className={`
                       relative flex items-center gap-2 rounded-xl px-4 py-2
                       text-sm font-medium transition-all duration-200
@@ -97,7 +98,7 @@ export default function Topbar({ activeNav, onNavChange }) {
                     {active && (
                       <span className="absolute inset-x-3 -bottom-[9px] h-[2px] rounded-full bg-emerald-500" />
                     )}
-                  </button>
+                  </Link>
                 );
               })}
             </nav>
@@ -213,13 +214,14 @@ export default function Topbar({ activeNav, onNavChange }) {
         {mobileOpen && (
           <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 flex flex-col gap-1">
             {/* Nav items */}
-            {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+            {NAV_ITEMS.map(({ id, label, icon: Icon, href }) => {
               const active = activeNav === id;
               return (
-                <button
+                <Link
                   key={id}
+                  href={href}
                   onClick={() => {
-                    onNavChange(id);
+                    onNavChange?.(id);
                     setMobileOpen(false);
                   }}
                   className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
@@ -232,7 +234,7 @@ export default function Topbar({ activeNav, onNavChange }) {
                     className={`w-4 h-4 shrink-0 ${active ? "text-emerald-400" : ""}`}
                   />
                   {label}
-                </button>
+                </Link>
               );
             })}
 

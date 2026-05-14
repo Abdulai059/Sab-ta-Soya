@@ -13,6 +13,12 @@ export default function DashboardNav() {
       className: "border-blue-500 text-gray-900",
     },
     {
+      href: "/maps",
+      label: "Live Map",
+      className: "border-emerald-500 text-gray-900",
+      icon: "🗺️",
+    },
+    {
       href: "/dashboard/operator",
       label: "Operator",
       showFor: ["admin", "operator"],
@@ -55,8 +61,9 @@ export default function DashboardNav() {
                 <Link
                   key={index}
                   href={item.href}
-                  className={`${item.className} inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium`}
+                  className={`${item.className || "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"} inline-flex items-center gap-1.5 px-3 pt-1 border-b-2 text-sm font-medium transition-colors`}
                 >
+                  {item.icon && <span>{item.icon}</span>}
                   {item.label}
                 </Link>
               );

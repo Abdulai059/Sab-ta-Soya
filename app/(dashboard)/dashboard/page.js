@@ -2,6 +2,17 @@
 
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+// Import map dynamically (client-side only)
+const MapView = dynamic(() => import("@/components/maps/MapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full flex items-center justify-center bg-stone-50 text-emerald-500 font-mono text-xs">
+      Loading map...
+    </div>
+  ),
+});
 
 export default function DashboardHomePage() {
   const { profile, loading, mounted } = useAuth();
@@ -15,6 +26,14 @@ export default function DashboardHomePage() {
   }
 
   const roleCards = [
+    {
+      title: "Live Map",
+      description: "View real-time sanitation incidents and field workers",
+      href: "/maps",
+      showFor: ["admin", "operator", "district_officer", "ngo"],
+      color: "bg-emerald-600",
+      icon: "🗺️",
+    },
     {
       title: "Operator Dashboard",
       description: "Manage sanitation operations and field activities",
@@ -50,20 +69,20 @@ export default function DashboardHomePage() {
   ];
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-6 h-screen flex flex-col overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col overflow-hidden">
         {/* Welcome Section */}
-        <div className="mb-8">
+        <div className="mb-6 shrink-0">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome back, {profile?.email?.split("@")[0]}!
           </h1>
           <p className="text-gray-600">
-            Role: <span className="font-semibold">{profile?.role}</span>
+            Role: <span className="font-semibold capitalize">{profile?.role?.replace("_", " ")}</span>
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 shrink-0">
           <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
             <div className="text-2xl font-bold text-gray-900">24</div>
             <div className="text-sm text-gray-600">Active Reports</div>
@@ -82,69 +101,59 @@ export default function DashboardHomePage() {
           </div>
         </div>
 
+        {/* Map Preview - Takes remaining space */}
+        <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
+          <div className="h-full flex flex-col">
+            <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between shrink-0">
+              <h2 className="text-lg font-semibold text-gray-900">Live Sanitation Map</h2>
+              <Link
+                href="/maps"
+                className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+              >
+                Full Screen
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </Link>
+            </div>
+            <div className="flex-1 relative">
+              <MapView
+                locations={[]}
+                activeLocation={{ id: "default", name: "Ghana", coords: [7.9465, -1.0232], color: "#00cc66" }}
+                onSelectLocation={() => {}}
+                communities={[]}
+                fieldWorkers={[]}
+                onSelectWorker={() => {}}
+                geofences={[]}
+                activeLayers={{ infrastructure: true, communities: true, incidents: true, fieldWorkers: true, geofences: true }}
+                onToggleLayer={() => {}}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Role-Based Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 shrink-0">
           {roleCards.map((card, index) => {
-            const shouldShow =
-              !card.showFor || card.showFor.includes(profile?.role);
+            const shouldShow = !card.showFor || card.showFor.includes(profile?.role);
             if (!shouldShow) return null;
 
             return (
               <Link
                 key={index}
                 href={card.href}
-                className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div
-                  className={`w-12 h-12 ${card.color} rounded-lg flex items-center justify-center mb-4`}
-                >
-                  <span className="text-2xl">{card.icon}</span>
+                <div className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center mb-3`}>
+                  <span className="text-xl">{card.icon}</span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">
                   {card.title}
                 </h3>
-                <p className="text-gray-600 text-sm">{card.description}</p>
+                <p className="text-gray-600 text-xs">{card.description}</p>
               </Link>
             );
           })}
-        </div>
-
-        {/* Recent Activity */}
-        <div className="mt-8 bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Recent Activity
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div>
-                <div className="font-medium text-gray-900">
-                  New sanitation report filed
-                </div>
-                <div className="text-sm text-gray-600">
-                  Tamale, Northern Region
-                </div>
-              </div>
-              <div className="text-sm text-gray-500">2 hours ago</div>
-            </div>
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div>
-                <div className="font-medium text-gray-900">
-                  Water quality inspection completed
-                </div>
-                <div className="text-sm text-gray-600">Savelugu District</div>
-              </div>
-              <div className="text-sm text-gray-500">5 hours ago</div>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <div>
-                <div className="font-medium text-gray-900">
-                  Emergency response deployed
-                </div>
-                <div className="text-sm text-gray-600">Yendi Municipality</div>
-              </div>
-              <div className="text-sm text-gray-500">1 day ago</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
