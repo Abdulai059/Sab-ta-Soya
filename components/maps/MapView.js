@@ -205,42 +205,71 @@ export default function MapView({
               eventHandlers={{ click: () => onSelectLocation(loc) }}
             >
               <Popup offset={[0, -40]}>
-                <div className="bg-white border border-stone-200 rounded-lg p-3 min-w-[150px] shadow-md">
-                  <div className="text-xs font-bold mb-0.5" style={{ color: loc.color }}>
-                    {loc.name}
+                <div className="bg-white border border-stone-200 rounded-lg overflow-hidden min-w-[180px] shadow-md">
+
+                  {/* Image */}
+                  {loc.imageUrl ? (
+                    <div className="relative w-full h-28 bg-stone-100">
+                      <img
+                        src={loc.imageUrl}
+                        alt={loc.imageCaption || loc.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {loc.imageCaption && (
+                        <div className="absolute bottom-0 inset-x-0 bg-black/40 text-white text-[9px] px-2 py-1 truncate">
+                          {loc.imageCaption}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full h-16 flex items-center justify-center"
+                      style={{ background: `${loc.color}18` }}
+                    >
+                      <span className="font-mono text-[9px] tracking-widest uppercase" style={{ color: loc.color }}>
+                        No Image
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Info */}
+                  <div className="p-3">
+                    <div className="text-xs font-bold mb-0.5" style={{ color: loc.color }}>
+                      {loc.name}
+                    </div>
+                    <div className="font-mono text-[10px] text-stone-400 mb-2">
+                      {loc.type} · {loc.status}
+                    </div>
+                    <div className="font-mono text-[10px] border-t border-stone-100 pt-1.5">
+                      <span className="text-stone-400">Incidents: </span>
+                      <span className="font-bold" style={{
+                        color: loc.incidents === 0 ? "#00cc66" : loc.incidents <= 2 ? "#ffaa00" : "#ff4444"
+                      }}>
+                        {loc.incidents}
+                      </span>
+                    </div>
+                    {loc.communityName && (
+                      <div className="font-mono text-[10px] text-stone-400 mt-0.5">
+                        {loc.communityName}
+                      </div>
+                    )}
+                    {loc.district && (
+                      <div className="font-mono text-[10px] text-stone-400">
+                        {loc.district}, {loc.region}
+                      </div>
+                    )}
+                    {loc.climateRisk && (
+                      <div className="font-mono text-[10px] mt-1 pt-1 border-t border-stone-100">
+                        <span className="text-stone-400">Climate Risk: </span>
+                        <span className="font-bold text-amber-600">{loc.climateRisk}</span>
+                      </div>
+                    )}
+                    {loc.waterAccess === false && (
+                      <div className="font-mono text-[10px] text-red-600 mt-0.5">
+                        ⚠️ Limited Water Access
+                      </div>
+                    )}
                   </div>
-                  <div className="font-mono text-[10px] text-stone-400 mb-2">
-                    {loc.type} · {loc.status}
-                  </div>
-                  <div className="font-mono text-[10px] border-t border-stone-100 pt-1.5">
-                    <span className="text-stone-400">Incidents: </span>
-                    <span className="font-bold" style={{
-                      color: loc.incidents === 0 ? "#00cc66" : loc.incidents <= 2 ? "#ffaa00" : "#ff4444"
-                    }}>
-                      {loc.incidents}
-                    </span>
-                  </div>
-                  {loc.communityName && (
-                    <div className="font-mono text-[10px] text-stone-400 mt-0.5">
-                      {loc.communityName}
-                    </div>
-                  )}
-                  {loc.district && (
-                    <div className="font-mono text-[10px] text-stone-400">
-                      {loc.district}, {loc.region}
-                    </div>
-                  )}
-                  {loc.climateRisk && (
-                    <div className="font-mono text-[10px] mt-1 pt-1 border-t border-stone-100">
-                      <span className="text-stone-400">Climate Risk: </span>
-                      <span className="font-bold text-amber-600">{loc.climateRisk}</span>
-                    </div>
-                  )}
-                  {loc.waterAccess === false && (
-                    <div className="font-mono text-[10px] text-red-600 mt-0.5">
-                      ⚠️ Limited Water Access
-                    </div>
-                  )}
                 </div>
               </Popup>
             </Marker>
