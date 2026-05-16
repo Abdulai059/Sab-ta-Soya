@@ -123,13 +123,13 @@ export default function MapsPage() {
   if (loading || !activeLocation) return <MapLoadingScreen />;
 
   return (
-    <div className="flex flex-col h-screen max-w-[98rem] mx-auto bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
+    <div className="flex flex-col max-w-392 mx-auto bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
       {/* Deep-link handler — reads ?lat=&lng=&name= from URL */}
       <Suspense fallback={null}>
         <DeepLinkHandler setActiveLocation={setActiveLocation} />
       </Suspense>
 
-      <div className="animate-slide-in-top relative z-[9999]">
+      <div className="animate-slide-in-top relative z-9999">
         <MapHeader
           rightPanel={rightPanel}
           setRightPanel={setRightPanel}
@@ -143,7 +143,7 @@ export default function MapsPage() {
         />
       </div>
 
-      <div className="relative z-[9999]">
+      <div className="relative z-9999">
         <MobileControls
           locations={locations}
           recentIncidents={recentIncidents}

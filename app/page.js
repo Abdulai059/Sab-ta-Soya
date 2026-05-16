@@ -18,18 +18,18 @@ export default function HomePage() {
     }
   }, [user, loading, mounted, router]);
 
-  if (!mounted || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-10 h-10 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
-      </div>
-    );
-  }
+  // if (!mounted || loading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-white">
+  //       <div className="w-10 h-10 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
+  //     </div>
+  //   );
+  // }
 
   if (user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50">
+    <div className="min-h-screen flex flex-col bg-[#f3f4f6]">
       <Topbar />
       <main className="flex-1 pt-16">
         <MapsPage />

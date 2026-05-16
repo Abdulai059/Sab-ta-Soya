@@ -2,10 +2,6 @@ import IncidentsPanel from "@/components/maps/IncidentsPanel";
 import LiveTrackingPanel from "@/components/maps/LiveTrackingPanel";
 import { PANEL_TYPES } from "@/lib/mapConstants";
 
-/**
- * Right panel component for desktop view
- * Switches between Incidents and Field Workers panels
- */
 export default function MapRightPanel({
   rightPanel,
   incidents,
@@ -21,7 +17,7 @@ export default function MapRightPanel({
   setSeverityFilter,
 }) {
   return (
-    <div className="hidden lg:flex">
+    <div className="hidden lg:flex h-full">
       {rightPanel === PANEL_TYPES.INCIDENTS ? (
         <IncidentsPanel
           incidents={incidents}

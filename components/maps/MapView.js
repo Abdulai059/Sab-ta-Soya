@@ -203,7 +203,7 @@ export default function MapView({
     <div className="flex-1 relative overflow-hidden z-0">
       {/* Active Location Badge */}
       {activeLocation && (
-        <div className="absolute top-2 left-2 z-500 bg-brand-soft-highlight text-gray-900 px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-xs">
+        <div className="absolute top-2 left-2 z-500 bg-brand-soft text-gray-900 px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-xs">
           <div className="uppercase text-[9px] text-stone-500">Active Zone</div>
           <div className="font-bold text-sm mt-1 text-stone-800">
             {activeLocation.name}

@@ -9,6 +9,8 @@ import {
   Map,
   Layers3,
   X,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 const layers = [
@@ -109,22 +111,45 @@ export default function LayerControls({
 
       {/* Desktop Panel */}
       <div className="hidden md:block absolute top-3 right-3 z-[500] w-52 overflow-hidden rounded-xl border border-stone-200 bg-white/95 shadow-lg backdrop-blur-sm">
-        <div className="border-b border-stone-100 px-3 py-2.5">
+        {/* Collapsible Header */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex w-full items-center justify-between border-b border-stone-100 px-3 py-2.5 hover:bg-stone-50 transition-colors"
+        >
           <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-stone-400">
             Map Layers
           </span>
-        </div>
 
-        <div className="flex flex-col gap-1 p-2">
-          {layers.map((layer) => (
-            <LayerButton
-              key={layer.key}
-              layer={layer}
-              isOn={activeLayers[layer.key]}
-              onClick={() => onToggle(layer.key)}
-              fieldWorkerCount={fieldWorkerCount}
-            />
-          ))}
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-600">
+              {activeCount}
+            </span>
+
+            {isExpanded ? (
+              <ChevronUp className="h-3.5 w-3.5 text-stone-400 transition-transform duration-200" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 text-stone-400 transition-transform duration-200" />
+            )}
+          </div>
+        </button>
+
+        {/* Collapsible Content */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="flex flex-col gap-1 p-2">
+            {layers.map((layer) => (
+              <LayerButton
+                key={layer.key}
+                layer={layer}
+                isOn={activeLayers[layer.key]}
+                onClick={() => onToggle(layer.key)}
+                fieldWorkerCount={fieldWorkerCount}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </>
