@@ -1,4 +1,4 @@
-# SaniTrack Climate
+# Sab'ta Soya Climate
 ### Climate-Resilient Sanitation Monitoring & Emergency Response System — Northern Ghana
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
