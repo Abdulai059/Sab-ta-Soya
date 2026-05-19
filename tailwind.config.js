@@ -13,6 +13,9 @@ module.exports = {
         'brand-soft': '#d5f6e5',
         'brand-muted': '#f4fdf8',
         'brand-highlight': '#e7f68f',
+        'brand-accent': '#fdc700',
+        'brand-soft-highlight': '#e7f68f',
+        'brand-yellowish-green': '#a5c94d',
         
         // Status Colors
         'status-danger': '#ef4444',

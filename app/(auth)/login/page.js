@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
-/* ── WASH-themed inline SVG illustration ── */
 function WashIllustration() {
   return (
     <svg
@@ -15,7 +14,6 @@ function WashIllustration() {
       className="w-full max-w-sm mx-auto"
       aria-hidden="true"
     >
-      {/* Ground */}
       <ellipse
         cx="210"
         cy="420"
@@ -25,7 +23,6 @@ function WashIllustration() {
         opacity="0.15"
       />
 
-      {/* Map / location card */}
       <rect
         x="60"
         y="260"
@@ -37,7 +34,6 @@ function WashIllustration() {
         strokeWidth="1.5"
       />
       <rect x="60" y="260" width="300" height="130" rx="18" fill="#f0fdf4" />
-      {/* Map grid lines */}
       <line
         x1="60"
         y1="295"
@@ -92,7 +88,6 @@ function WashIllustration() {
         strokeWidth="0.8"
         opacity="0.4"
       />
-      {/* Map pins */}
       <circle cx="155" cy="310" r="8" fill="#9dc43b" opacity="0.9" />
       <path
         d="M155 302 C150 302 146 306 146 311 C146 318 155 326 155 326 C155 326 164 318 164 311 C164 306 160 302 155 302Z"
@@ -112,7 +107,6 @@ function WashIllustration() {
       />
       <circle cx="290" cy="301" r="2.5" fill="white" />
 
-      {/* Big water drop */}
       <path
         d="M210 40 C210 40 160 110 160 155 C160 183 183 205 210 205 C237 205 260 183 260 155 C260 110 210 40 210 40Z"
         fill="#9dc43b"
@@ -125,7 +119,6 @@ function WashIllustration() {
         strokeLinecap="round"
         opacity="0.5"
       />
-      {/* Shine on drop */}
       <ellipse
         cx="196"
         cy="120"
@@ -136,7 +129,6 @@ function WashIllustration() {
         transform="rotate(-20 196 120)"
       />
 
-      {/* Ripple rings under drop */}
       <ellipse
         cx="210"
         cy="215"
@@ -168,7 +160,6 @@ function WashIllustration() {
         opacity="0.15"
       />
 
-      {/* Stat badge — Incidents resolved */}
       <rect
         x="20"
         y="150"
@@ -211,7 +202,6 @@ function WashIllustration() {
         24
       </text>
 
-      {/* Stat badge — Active reports */}
       <rect
         x="270"
         y="150"
@@ -253,7 +243,6 @@ function WashIllustration() {
         11
       </text>
 
-      {/* Bottom label */}
       <text
         x="210"
         y="408"
@@ -280,10 +269,28 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
-    if (!error) {
+    const { error, profile } = await signIn(email, password);
+    
+    if (!error && profile) {
       if (onCloseModal) onCloseModal();
-      router.push("/dashboard");
+      
+      // Redirect based on user role
+      switch (profile.role) {
+        case "admin":
+          router.push("/admin");
+          break;
+        case "operator":
+          router.push("/operator");
+          break;
+        case "district_officer":
+          router.push("/district-officer");
+          break;
+        case "ngo":
+          router.push("/ngo");
+          break;
+        default:
+          router.push("/dashboard");
+      }
     }
     setLoading(false);
   };
@@ -291,9 +298,7 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
   return (
     <div className="min-h-screen flex items-center justify-center ">
       <div className="flex w-full max-w-4xl mx-4 rounded-[2.5rem] shadow-2xl overflow-hidden bg-white">
-        {/* ── LEFT — Form panel ── */}
         <div className="flex flex-col justify-center w-full lg:w-1/2 px-10 py-14">
-          {/* Logo / brand */}
           <div className="mb-8">
             <span className="inline-flex items-center gap-2 text-emerald-600 font-bold text-lg tracking-tight">
               <svg
@@ -304,17 +309,16 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
               >
                 <path d="M12 2C12 2 5 9.5 5 14a7 7 0 0014 0C19 9.5 12 2 12 2z" />
               </svg>
-              SaniTrack
+              Sab'ta Soya
             </span>
           </div>
 
           <h1 className="text-2xl font-bold text-stone-900 mb-1">Sign in</h1>
           <p className="text-stone-500 text-sm mb-8">
-            Welcome back — enter your credentials to continue.
+            Welcome back enter your credentials to continue.
           </p>
 
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -334,7 +338,6 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
               />
             </div>
 
-            {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label
@@ -376,7 +379,6 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -411,7 +413,6 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
             </button>
           </form>
 
-          {/* Footer */}
           <p className="mt-8 text-sm text-stone-500 text-center">
             Not a member?{" "}
             {onSwitchToSignUp ? (
@@ -432,9 +433,7 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
           </p>
         </div>
 
-        {/* ── RIGHT — Illustration panel ── */}
         <div className="hidden lg:flex flex-col items-center justify-center w-1/2 bg-[#f0fdf4] rounded-l-[2.5rem] px-12 py-16 relative overflow-hidden">
-          {/* Subtle background circles */}
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-emerald-200 opacity-20" />
           <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-teal-300 opacity-15" />
 
@@ -450,7 +449,6 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
             </p>
           </div>
 
-          {/* Dots indicator */}
           <div className="flex items-center gap-2 mt-8">
             <span className="w-6 h-2 rounded-full bg-emerald-500" />
             <span className="w-2 h-2 rounded-full bg-emerald-200" />

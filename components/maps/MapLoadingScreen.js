@@ -51,7 +51,7 @@ export default function MapLoadingScreen() {
           style={{ animationDelay: "100ms" }}
         >
           <h1 className="text-xl font-bold tracking-tight text-stone-900">
-            Sani<span className="text-emerald-600">Track</span>
+            Sab'ta<span className="text-emerald-600">Soya</span>
           </h1>
           <p className="font-mono text-[11px] tracking-[0.2em] text-stone-400 uppercase mt-0.5">
             Sanitation GIS

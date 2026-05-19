@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
-/* ── WASH-themed inline SVG illustration ── */
 function WashIllustration() {
   return (
     <svg
@@ -15,10 +14,8 @@ function WashIllustration() {
       className="w-full max-w-sm mx-auto"
       aria-hidden="true"
     >
-      {/* Ground shadow */}
       <ellipse cx="210" cy="420" rx="160" ry="18" fill="#9dc43b" opacity="0.15" />
 
-      {/* Central shield / coverage icon */}
       <path
         d="M210 55 L270 80 L270 155 C270 195 242 228 210 240 C178 228 150 195 150 155 L150 80 Z"
         fill="#9dc43b"
@@ -31,7 +28,6 @@ function WashIllustration() {
         fill="#9dc43b"
         opacity="0.25"
       />
-      {/* Checkmark inside shield */}
       <path
         d="M192 150 L204 162 L228 138"
         stroke="#16a34a"
@@ -40,21 +36,17 @@ function WashIllustration() {
         strokeLinejoin="round"
       />
 
-      {/* Ripple rings */}
       <ellipse cx="210" cy="248" rx="30" ry="9" stroke="#9dc43b" strokeWidth="1.5" fill="none" opacity="0.5" />
       <ellipse cx="210" cy="248" rx="48" ry="14" stroke="#9dc43b" strokeWidth="1" fill="none" opacity="0.3" />
       <ellipse cx="210" cy="248" rx="66" ry="19" stroke="#9dc43b" strokeWidth="0.8" fill="none" opacity="0.15" />
 
-      {/* Map card */}
       <rect x="60" y="270" width="300" height="120" rx="18" fill="#f0fdf4" stroke="#e5e7eb" strokeWidth="1.5" />
-      {/* Grid */}
       <line x1="60" y1="300" x2="360" y2="300" stroke="#9dc43b" strokeWidth="0.8" opacity="0.35" />
       <line x1="60" y1="330" x2="360" y2="330" stroke="#9dc43b" strokeWidth="0.8" opacity="0.35" />
       <line x1="60" y1="360" x2="360" y2="360" stroke="#9dc43b" strokeWidth="0.8" opacity="0.35" />
       <line x1="140" y1="270" x2="140" y2="390" stroke="#9dc43b" strokeWidth="0.8" opacity="0.35" />
       <line x1="210" y1="270" x2="210" y2="390" stroke="#9dc43b" strokeWidth="0.8" opacity="0.35" />
       <line x1="280" y1="270" x2="280" y2="390" stroke="#9dc43b" strokeWidth="0.8" opacity="0.35" />
-      {/* Pins */}
       <path d="M160 295 C156 295 153 298 153 302 C153 307 160 314 160 314 C160 314 167 307 167 302 C167 298 164 295 160 295Z" fill="#9dc43b" />
       <circle cx="160" cy="302" r="2.5" fill="white" />
       <path d="M240 318 C236 318 233 321 233 325 C233 330 240 337 240 337 C240 337 247 330 247 325 C247 321 244 318 240 318Z" fill="#ef4444" />
@@ -62,7 +54,6 @@ function WashIllustration() {
       <path d="M300 285 C296 285 293 288 293 292 C293 297 300 304 300 304 C300 304 307 297 307 292 C307 288 304 285 300 285Z" fill="#f59e0b" />
       <circle cx="300" cy="292" r="2.5" fill="white" />
 
-      {/* Left stat badge */}
       <rect x="18" y="155" width="128" height="70" rx="14" fill="white" stroke="#e5e7eb" strokeWidth="1.5" />
       <circle cx="42" cy="180" r="10" fill="#dcfce7" />
       <path d="M38 180 L41 183 L47 177" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -97,12 +88,23 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signUp(email, password);
+    const { error, shouldRedirectToLogin } = await signUp(email, password);
+    
     if (!error) {
+      // Redirect to login page after successful signup
       setTimeout(() => {
         if (onCloseModal) onCloseModal();
         router.push("/login");
-      }, 2000);
+      }, 1500);
+    } else if (shouldRedirectToLogin) {
+      // User already exists, redirect to login
+      setTimeout(() => {
+        if (onSwitchToSignIn) {
+          onSwitchToSignIn();
+        } else {
+          router.push("/login");
+        }
+      }, 1500);
     }
     setLoading(false);
   };
@@ -111,9 +113,7 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex w-full max-w-4xl mx-4 rounded-[2.5rem] shadow-2xl overflow-hidden bg-white">
 
-        {/* ── LEFT — Form panel ── */}
         <div className="flex flex-col justify-center w-full lg:w-1/2 px-10 py-14">
-          {/* Logo / brand */}
           <div className="mb-8">
             <span className="inline-flex items-center gap-2 text-emerald-600 font-bold text-lg tracking-tight">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -129,7 +129,6 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
           </p>
 
           <form onSubmit={handleSignUp} className="space-y-5">
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
                 Email
@@ -146,7 +145,6 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-xs font-semibold text-stone-600 mb-1.5 uppercase tracking-wide">
                 Password
@@ -173,7 +171,6 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -193,7 +190,6 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
             </button>
           </form>
 
-          {/* Footer */}
           <p className="mt-8 text-sm text-stone-500 text-center">
             Already have an account?{" "}
             {onSwitchToSignIn ? (
@@ -214,9 +210,7 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
           </p>
         </div>
 
-        {/* ── RIGHT — Illustration panel ── */}
         <div className="hidden lg:flex flex-col items-center justify-center w-1/2 bg-[#f0fdf4] rounded-l-[2.5rem] px-12 py-16 relative overflow-hidden">
-          {/* Subtle background circles */}
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-emerald-200 opacity-20" />
           <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-teal-300 opacity-15" />
 
@@ -231,7 +225,6 @@ export default function SignUpPage({ onCloseModal, onSwitchToSignIn }) {
             </p>
           </div>
 
-          {/* Dots indicator */}
           <div className="flex items-center gap-2 mt-8">
             <span className="w-2 h-2 rounded-full bg-emerald-200" />
             <span className="w-2 h-2 rounded-full bg-emerald-200" />

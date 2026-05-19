@@ -48,7 +48,7 @@ function Window({ children, name }) {
     <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm transition-all duration-500 overflow-y-auto">
       <div
         ref={ref}
-        className=" flex items-center justify-center p-4"
+        className="min-h-screen flex items-center justify-center p-2 sm:p-4"
       >
         <div className="relative w-full max-w-4xl">
           <button
