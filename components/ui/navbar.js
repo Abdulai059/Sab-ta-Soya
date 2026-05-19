@@ -63,13 +63,13 @@ export default function Topbar({ activeNav, onNavChange }) {
         <div className="h-16 max-w-[98rem] mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-5 min-w-0">
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 transition-transform duration-200 group-hover:scale-105">
+              <div className="w-11 h-11 rounded-2xl bg-brand-yellowish-green flex items-center justify-center shadow-lg shadow-emerald-500/20 transition-transform duration-200 group-hover:scale-105">
                 <Droplets className="w-5 h-5 text-white" />
               </div>
 
               <div className="leading-tight hidden sm:block">
                 <h1 className="text-[15px] font-bold tracking-tight text-stone-900">
-                  Sani<span className="text-emerald-600">Track</span>
+                  Sab<span className="text-emerald-600">’ta</span>
                 </h1>
 
                 <p className="text-[11px] text-stone-400">
@@ -306,22 +306,35 @@ export default function Topbar({ activeNav, onNavChange }) {
                   </button>
                 </>
               ) : (
-                <div className="flex flex-col gap-2">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="w-full text-center rounded-xl px-4 py-2.5 text-sm font-medium border bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setMobileOpen(false)}
-                    className="w-full text-center rounded-xl px-4 py-2.5 text-sm font-medium bg-brand-soft text-gray-900 hover:bg-brand-soft-highlight transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
+                <Modal>
+                  <div className="flex flex-col gap-2">
+                    <Modal.Open opens="sign-in">
+                      <button
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full text-center rounded-xl px-4 py-2.5 text-sm font-medium border bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors"
+                      >
+                        Sign In
+                      </button>
+                    </Modal.Open>
+
+                    <Modal.Open opens="sign-up">
+                      <button
+                        onClick={() => setMobileOpen(false)}
+                        className="w-full text-center rounded-xl px-4 py-2.5 text-sm font-medium bg-brand-soft text-gray-900 hover:bg-brand-soft-highlight transition-colors"
+                      >
+                        Sign Up
+                      </button>
+                    </Modal.Open>
+                  </div>
+
+                  <Modal.Window name="sign-in">
+                    <LoginPage />
+                  </Modal.Window>
+
+                  <Modal.Window name="sign-up">
+                    <SignUpPage />
+                  </Modal.Window>
+                </Modal>
               )}
             </div>
           </div>

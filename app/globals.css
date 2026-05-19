@@ -9,6 +9,7 @@
   --brand-accent: #fdc700;
   --brand-highlight: #e7f68f;
   --brand-soft-highlight: #e7f68f;
+  --brand-yellowish-green: #a5c94d;
 
   /* ── Status / Role Colors ── */
   --status-danger: #ef4444;
@@ -57,6 +58,7 @@
   --color-brand-highlight: var(--brand-highlight);
   --color-brand-accent: var(--brand-accent);
   --color-brand-soft-highlight: var(--brand-soft-highlight);
+  --color-brand-yellowish-green: var(--brand-yellowish-green);
 
   /* Status */
   --color-status-danger: var(--status-danger);

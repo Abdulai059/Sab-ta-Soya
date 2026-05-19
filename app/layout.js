@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
+import LayoutWrapper from "@/components/ui/LayoutWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,8 +48,22 @@ export default function RootLayout({ children }) {
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
-          <Toaster position="top-right" />
-          {children}
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              style: {
+                zIndex: 99999,
+              },
+              className: '',
+              duration: 4000,
+            }}
+            containerStyle={{
+              zIndex: 99999,
+            }}
+          />
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
         </AuthProvider>
       </body>
     </html>

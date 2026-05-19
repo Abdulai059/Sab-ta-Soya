@@ -116,20 +116,64 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data: signInData } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      if (signInData?.user) {
+        toast.error("User already exists. Please log in instead.");
+        return { error: { message: "User already exists" }, shouldRedirectToLogin: true };
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+
       if (error) {
+        if (error.message.includes("already registered") || error.message.includes("already exists")) {
+          toast.error("User already exists. Please log in instead.");
+          return { error, shouldRedirectToLogin: true };
+        }
         toast.error(error.message);
         return { error };
-      } else {
-        toast.success("Check your email for confirmation!");
-        return { data };
       }
+
+      if (data?.user) {
+        let userRole = "operator";
+        
+        if (email.endsWith("@admin.com") || email.includes("admin")) {
+          userRole = "admin";
+        } else if (email.includes("district")) {
+          userRole = "district_officer";
+        } else if (email.includes("ngo")) {
+          userRole = "ngo";
+        }
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: data.user.id,
+              email: email,
+              role: userRole,
+            },
+          ]);
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+        }
+      }
+
+      toast.success("Account created successfully! You can now sign in.");
+      return { data };
     } catch (error) {
-      toast.error("Sign up failed");
+      console.error("Sign up error:", error);
+      toast.error("Sign up failed. Please try again.");
       return { error };
     }
   };
@@ -144,11 +188,30 @@ export const AuthProvider = ({ children }) => {
       if (error) {
         toast.error(error.message);
         return { error };
-      } else {
-        toast.success("Signed in successfully!");
-        return { data };
       }
+
+      if (data?.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError);
+          toast.error("Error loading user profile");
+          return { error: profileError };
+        }
+
+        setProfile(profileData);
+        toast.success("Signed in successfully!");
+        
+        return { data, profile: profileData };
+      }
+
+      return { data };
     } catch (error) {
+      console.error("Sign in error:", error);
       toast.error("Sign in failed");
       return { error };
     }
@@ -163,7 +226,6 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setProfile(null);
         toast.success("Signed out successfully!");
-        // Small delay to ensure state is cleared before redirect
         setTimeout(() => {
           router.push("/");
         }, 100);
