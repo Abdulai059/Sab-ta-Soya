@@ -23,12 +23,12 @@ import SignUpPage from "@/app/(auth)/signup/page";
 
 const NAV_ITEMS = [
   { id: "map", label: "Map", icon: Map, href: null },
-  { id: "reports", label: "Reports", icon: ClipboardList, href: "/reports" },
+  { id: "reports", label: "Reports list", icon: ClipboardList, href: "/reports" },
   {
-    id: "ChildSafety",
-    label: "Safety Child",
+    id: "Submitissue",
+    label: "Submit issue",
     icon: BarChart3,
-    href: "/child-safety",
+    href: "/reporteissue",
   },
   {
     id: "Safety Tips",
@@ -59,7 +59,7 @@ export default function Topbar({ activeNav, onNavChange }) {
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 z-50 border-b border-stone-200/70 bg-white/85 backdrop-blur-xl">
+      <header className="fixed top-0 inset-x-0 z-50 border-b border-stone-200/70 bg-white backdrop-blur-xl">
         <div className="h-16 max-w-[98rem] mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-5 min-w-0">
             <Link href="/" className="flex items-center gap-3 shrink-0 group">

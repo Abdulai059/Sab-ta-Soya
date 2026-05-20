@@ -17,7 +17,7 @@ export function useReports() {
         .from("sanitation_reports")
         .select(`
           *,
-          location:locations(name, area_name, landmark),
+          location:locations(name, area_name, landmark, latitude, longitude),
           community:communities(name, district, region),
           reported_by_profile:profiles!reported_by(full_name, phone),
           climate_event:climate_events(event_type, severity)

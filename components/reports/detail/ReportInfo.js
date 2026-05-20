@@ -5,7 +5,9 @@ import {
   Phone,
   Users,
   FileText,
+  Navigation,
 } from "lucide-react";
+import { navigateTo } from "@/utils/navigateTo";
 
 export default function ReportInfo({ report }) {
   return (
@@ -30,6 +32,16 @@ export default function ReportInfo({ report }) {
             </p>
             {report.location?.area_name && (
               <p className="text-sm text-gray-500">{report.location.area_name}</p>
+            )}
+            {report.location?.latitude && report.location?.longitude && (
+              <button
+                onClick={() => navigateTo(report.location.latitude, report.location.longitude)}
+                className="mt-1 flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700"
+                title="Get directions in Google Maps"
+              >
+                <Navigation className="w-3 h-3" />
+                Open in Maps
+              </button>
             )}
           </div>
         </div>
