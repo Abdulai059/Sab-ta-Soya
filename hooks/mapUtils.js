@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 
-/* ─── Leaflet icon fix ─────────────────────────────────────────────────────── */
+/* ─── Leaflet icon fix ───────────*/
 // Must run once at module level — Leaflet's default icons break under webpack
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -14,12 +14,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/* ─── Icon colour helper ───────────────────────────────────────────────────── */
+/* ─── Icon colour helper ────────── */
 // Green = no incidents, amber = 1–2, red = 3+
 export const getIncidentColor = (count) =>
   count === 0 ? "#00cc66" : count <= 2 ? "#ffaa00" : "#ff4444";
 
-/* ─── SVG icon factories ───────────────────────────────────────────────────── */
+/* ─── SVG icon factories ──────── */
 
 export function infraIcon(location) {
   const ringColor = getIncidentColor(location.incidents);
@@ -87,7 +87,7 @@ export function workerIcon(worker) {
   });
 }
 
-/* ─── Map utility components ───────────────────────────────────────────────── */
+/* ─── Map utility components ──── */
 
 // Smoothly flies the camera to a new location when activeLocation changes
 export function FlyTo({ coords, zoom = 14 }) {

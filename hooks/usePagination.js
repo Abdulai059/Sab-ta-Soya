@@ -7,6 +7,7 @@ export function usePagination(items, itemsPerPage = 10) {
 
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentPage(1);
     }
   }, [items.length, totalPages, currentPage]);

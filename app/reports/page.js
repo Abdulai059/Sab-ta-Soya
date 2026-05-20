@@ -64,19 +64,12 @@ export default function ReportsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <StatsCard value={stats.total} label="Total reports" color="gray" />
-          <StatsCard
-            value={stats.pending}
-            label="Pending / Assigned"
-            color="orange"
-          />
+          <StatsCard value={stats.pending} label="Pending" color="yellow" />
+          <StatsCard value={stats.assigned} label="Assigned" color="blue" />
           <StatsCard value={stats.resolved} label="Completed" color="emerald" />
-          <StatsCard
-            value={stats.critical}
-            label="Critical / health risk"
-            color="red"
-          />
+          <StatsCard value={stats.critical} label="Critical / health risk" color="red" />
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6 mt-4 bg-white">

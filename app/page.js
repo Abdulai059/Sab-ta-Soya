@@ -4,19 +4,25 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
-import Topbar from "@/components/ui/navbar";
+import Topbar from "@/components/ui/PublicNavbar";
 
 const MapsPage = dynamic(() => import("./maps/page"), { ssr: false });
 
 export default function HomePage() {
-  const { user, loading, mounted } = useAuth();
+  const { user, profile, loading, mounted } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && mounted && user) {
-      router.push("/dashboard");
+    if (!loading && mounted && user && profile) {
+      const roleRoutes = {
+        admin: "/admin",
+        district_officer: "/district-officer",
+        ngo: "/ngo",
+      };
+      const destination = roleRoutes[profile.role] ?? "/operator";
+      if (destination) router.push(destination);
     }
-  }, [user, loading, mounted, router]);
+  }, [user, profile, loading, mounted, router]);
 
   // if (!mounted || loading) {
   //   return (
@@ -26,7 +32,7 @@ export default function HomePage() {
   //   );
   // }
 
-  if (user) return null;
+  if (user && profile) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f3f4f6]">

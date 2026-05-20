@@ -4,18 +4,34 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useReportDetail } from "@/hooks/useReportDetail";
+import { useDashboardView } from "@/context/DashboardViewContext";
 import ReportHeader from "@/components/reports/detail/ReportHeader";
 import ReportInfo from "@/components/reports/detail/ReportInfo";
 import ClimateEventBanner from "@/components/reports/detail/ClimateEventBanner";
 import AssignmentsList from "@/components/reports/detail/AssignmentsList";
 import StatusHistory from "@/components/reports/detail/StatusHistory";
 import QuickActions from "@/components/reports/detail/QuickActions";
+import LocationImages from "@/components/reports/detail/LocationImages";
 
 export default function ReportDetailPage() {
   const { profile } = useAuth();
   const router = useRouter();
   const params = useParams();
-  const { report, assignments, statusHistory, loading } = useReportDetail(params.id);
+  const dashCtx = useDashboardView();
+  const isInDashboard = !!dashCtx?.goBack;
+
+  // Use id from dashboard context params if inside dashboard, else from URL
+  const reportId = isInDashboard ? dashCtx.viewParams?.id : params?.id;
+
+  const { report, assignments, statusHistory, locationImages, loading } = useReportDetail(reportId);
+
+  const handleBack = () => {
+    if (isInDashboard) {
+      dashCtx.goBack();
+    } else {
+      router.push("/reports");
+    }
+  };
 
   if (loading) {
     return (
@@ -33,7 +49,7 @@ export default function ReportDetailPage() {
             Report not found
           </h2>
           <button
-            onClick={() => router.push("/reports")}
+            onClick={handleBack}
             className="text-emerald-600 hover:text-emerald-700"
           >
             ← Back to reports
@@ -44,10 +60,10 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6 md:pt-30 pt-0 ">
       <div className="max-w-6xl mx-auto">
         <button
-          onClick={() => router.push("/reports")}
+          onClick={handleBack}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -66,6 +82,11 @@ export default function ReportDetailPage() {
           </div>
 
           <div className="space-y-6">
+            <LocationImages
+              images={locationImages}
+              locationName={report.location?.name}
+              location={report.location}
+            />
             <StatusHistory history={statusHistory} />
             <QuickActions profile={profile} />
           </div>

@@ -1,9 +1,20 @@
 import { Eye, Lock, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { navigateTo } from "@/utils/navigateTo";
+import { useDashboardView } from "@/context/DashboardViewContext";
 
 export default function ReportTableRow({ report, profile, formatTimeAgo }) {
   const router = useRouter();
+  const dashCtx = useDashboardView();
+  const isInDashboard = !!dashCtx?.setView;
+
+  const handleView = () => {
+    if (isInDashboard) {
+      dashCtx.setView("reportDetail", { id: report.id });
+    } else {
+      router.push(`/reports/${report.id}`);
+    }
+  };
 
   const getSeverityColor = (severity) => {
     switch (severity?.toLowerCase()) {
@@ -82,7 +93,7 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
       <td className={`${cell} whitespace-nowrap`}>
         <div className="flex items-center gap-1.5">
           <button
-            onClick={() => router.push(`/reports/${report.id}`)}
+            onClick={handleView}
             className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
             title="View details"
           >

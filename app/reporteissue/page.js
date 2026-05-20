@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { useDashboardView } from "@/context/DashboardViewContext";
 import toast from "react-hot-toast";
 import {
   MapPin, AlertTriangle, Camera, User, Leaf, AlertCircle,
@@ -469,6 +470,18 @@ function CameraSection({ photos, setPhotos }) {
 export default function ReportForm() {
   const router = useRouter();
   const { profile } = useAuth();
+  const dashCtx = useDashboardView();
+  const isInDashboard = !!dashCtx?.goBack;
+
+  const handleCancel = () => {
+    if (isInDashboard) dashCtx.goBack();
+    else router.push("/reports");
+  };
+
+  const handleSuccess = () => {
+    if (isInDashboard) dashCtx.setView("reports");
+    else router.push("/reports");
+  };
 
   const [form, setForm] = useState({
     issueType: "",
@@ -553,7 +566,7 @@ export default function ReportForm() {
       if (error) throw error;
 
       toast.success("Report submitted successfully");
-      router.push("/reports");
+      handleSuccess();
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("Failed to submit report. Please try again.");
@@ -572,7 +585,7 @@ export default function ReportForm() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-0">
+        <div className="bg-white rounded-sm border border-gray-200 p-6 space-y-0">
 
           {/* ── Incident Details ── */}
           <div>
@@ -754,7 +767,7 @@ export default function ReportForm() {
             </span>
             <div className="flex gap-2">
               <button
-                onClick={() => router.push("/reports")}
+                onClick={handleCancel}
                 className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
               >
                 Cancel

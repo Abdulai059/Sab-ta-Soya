@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import {
-  Bell,
   Droplets,
   Map,
   ClipboardList,
@@ -16,6 +15,7 @@ import {
   ChevronDown,
   UserCircle2,
   X,
+  Bell,
 } from "lucide-react";
 import Modal from "./Modal";
 import LoginPage from "@/app/(auth)/login/page";
@@ -23,7 +23,12 @@ import SignUpPage from "@/app/(auth)/signup/page";
 
 const NAV_ITEMS = [
   { id: "map", label: "Map", icon: Map, href: null },
-  { id: "reports", label: "Reports list", icon: ClipboardList, href: "/reports" },
+  {
+    id: "reports",
+    label: "Reports list",
+    icon: ClipboardList,
+    href: "/reports",
+  },
   {
     id: "Submitissue",
     label: "Submit issue",
@@ -40,15 +45,22 @@ const NAV_ITEMS = [
 
 const ROLE_COLORS = {
   admin: "bg-violet-100 text-violet-700",
-  operator: "bg-emerald-100 text-emerald-700",
   district_officer: "bg-sky-100 text-sky-700",
+  community_officer: "bg-emerald-100 text-emerald-700",
+  health_officer: "bg-pink-100 text-pink-700",
   ngo: "bg-amber-100 text-amber-700",
+  response_team: "bg-red-100 text-red-700",
+  headteacher: "bg-indigo-100 text-indigo-700",
+  community_agent: "bg-teal-100 text-teal-700",
+  sanitation_worker: "bg-lime-100 text-lime-700",
+  field_worker: "bg-orange-100 text-orange-700",
+  supervisor: "bg-cyan-100 text-cyan-700",
 };
 
 const buttonStyles =
   "rounded-xl px-4 py-2 text-sm font-medium transition active:scale-95";
 
-export default function Topbar({ activeNav, onNavChange }) {
+export default function PublicNavbar({ activeNav, onNavChange }) {
   const { profile, signOut } = useAuth();
   const isAuthenticated = !!profile;
 
@@ -69,7 +81,7 @@ export default function Topbar({ activeNav, onNavChange }) {
 
               <div className="leading-tight hidden sm:block">
                 <h1 className="text-[15px] font-bold tracking-tight text-stone-900">
-                  Sab<span className="text-emerald-600">’ta</span>
+                  Sab<span className="text-emerald-600">'ta</span>
                 </h1>
 
                 <p className="text-[11px] text-stone-400">
@@ -109,7 +121,7 @@ export default function Topbar({ activeNav, onNavChange }) {
                   </>
                 );
 
-                // ✅ MAP = BUTTON (NO ROUTE)
+                // MAP = BUTTON (NO ROUTE)
                 if (isMap) {
                   return (
                     <button
@@ -122,7 +134,7 @@ export default function Topbar({ activeNav, onNavChange }) {
                   );
                 }
 
-                // ✅ OTHERS = LINKS
+                // OTHERS = LINKS
                 return (
                   <Link
                     key={id}
@@ -208,7 +220,9 @@ export default function Topbar({ activeNav, onNavChange }) {
               <div className="hidden sm:flex items-center gap-2 pl-1">
                 <Modal>
                   <Modal.Open opens="sign-in">
-                    <button className={`${buttonStyles} bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900`}>
+                    <button
+                      className={`${buttonStyles} bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-900`}
+                    >
                       Login
                     </button>
                   </Modal.Open>
