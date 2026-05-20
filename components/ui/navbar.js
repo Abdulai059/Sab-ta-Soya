@@ -80,7 +80,7 @@ export default function Topbar({ activeNav, onNavChange }) {
 
             <div className="hidden lg:block w-px h-7 bg-stone-200" />
 
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex gap-4 items-center gap-1">
               {NAV_ITEMS.map(({ id, label, icon: Icon, href }) => {
                 const isMap = id === "map";
                 const active = activeNav === id;
