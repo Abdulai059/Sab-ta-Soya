@@ -4,101 +4,177 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardView } from "@/context/DashboardViewContext";
+import { useHasPermission } from "@/hooks/usePermissions";
 import {
-  ShieldCheck, Wrench, Landmark, Handshake,
-  ClipboardList, Map, FileEdit, Settings,
-  LogOut, ChevronRight, X,
+  DASHBOARD,
+  REPORTS,
+  MAP,
+  SETTINGS,
+  USERS,
+  ROLES,
+  ROLE_METADATA,
+} from "@/lib/permissions";
+import {
+  ShieldCheck,
+  Landmark,
+  Handshake,
+  ClipboardList,
+  Map as MapIcon,
+  FileEdit,
+  Settings as SettingsIcon,
+  LayoutDashboard,
+  LogOut,
+  ChevronRight,
+  X,
 } from "lucide-react";
 
-const NAV_BY_ROLE = {
-  admin: [
-    { label: "Admin Panel",      href: "/admin",            icon: ShieldCheck,   type: "link" },
-    { label: "District Officer", href: "/district-officer", icon: Landmark,      type: "link" },
-    { label: "NGO",              href: "/ngo",              icon: Handshake,     type: "link" },
-    { type: "divider" },
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-    { type: "divider" },
-    { label: "Settings",         href: "/settings",         icon: Settings,      type: "link" },
-  ],
-  district_officer: [
-    { label: "District View",    href: "/district-officer", icon: Landmark,      type: "link" },
-    { type: "divider" },
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  community_officer: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  health_officer: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  ngo: [
-    { label: "NGO Portal",       href: "/ngo",              icon: Handshake,     type: "link" },
-    { type: "divider" },
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  response_team: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  headteacher: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  community_agent: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  sanitation_worker: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  field_worker: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  supervisor: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-};
+/**
+ * Navigation items with associated permissions
+ * Each item requires specific permissions to be shown
+ */
+const NAV_ITEMS = [
+  // Dashboard Links
+  {
+    label: "Admin Panel",
+    href: "/admin",
+    icon: ShieldCheck,
+    type: "link",
+    permission: DASHBOARD.VIEW_ADMIN_PANEL,
+  },
+  {
+    label: "Analytics Dashboard",
+    href: "/admin/dashboard",
+    icon: LayoutDashboard,
+    type: "link",
+    permission: DASHBOARD.VIEW_ADMIN_PANEL,
+  },
+  {
+    label: "District View",
+    href: "/district-officer",
+    icon: Landmark,
+    type: "link",
+    permission: DASHBOARD.VIEW_DISTRICT_PANEL,
+  },
+  {
+    label: "NGO Portal",
+    href: "/ngo",
+    icon: Handshake,
+    type: "link",
+    permission: DASHBOARD.VIEW_NGO_PORTAL,
+  },
+  {
+    label: "Operator Panel",
+    href: "/operator",
+    icon: ShieldCheck,
+    type: "link",
+    permission: DASHBOARD.VIEW_OPERATOR_PANEL,
+  },
+  {
+    label: "Supervisor Panel",
+    href: "/supervisor",
+    icon: ShieldCheck,
+    type: "link",
+    permission: DASHBOARD.VIEW_SUPERVISOR_PANEL,
+  },
 
-const ROLE_META = {
-  admin:             { label: "Administrator",    color: "bg-violet-100 text-violet-700" },
-  district_officer:  { label: "District Officer", color: "bg-sky-100 text-sky-700" },
-  community_officer: { label: "Community Officer",color: "bg-emerald-100 text-emerald-700" },
-  health_officer:    { label: "Health Officer",   color: "bg-pink-100 text-pink-700" },
-  ngo:               { label: "NGO Partner",      color: "bg-amber-100 text-amber-700" },
-  response_team:     { label: "Response Team",    color: "bg-red-100 text-red-700" },
-  headteacher:       { label: "Head Teacher",     color: "bg-indigo-100 text-indigo-700" },
-  community_agent:   { label: "Community Agent",  color: "bg-teal-100 text-teal-700" },
-  sanitation_worker: { label: "Sanitation Worker",color: "bg-lime-100 text-lime-700" },
-  field_worker:      { label: "Field Worker",     color: "bg-orange-100 text-orange-700" },
-  supervisor:        { label: "Supervisor",       color: "bg-cyan-100 text-cyan-700" },
-};
+  // Divider
+  { type: "divider" },
+
+  // View Items
+  {
+    label: "Reports",
+    view: "reports",
+    icon: ClipboardList,
+    type: "view",
+    permission: REPORTS.VIEW_ALL,
+  },
+  {
+    label: "Live Map",
+    view: "map",
+    icon: MapIcon,
+    type: "view",
+    permission: MAP.VIEW,
+  },
+  {
+    label: "Submit Issue",
+    view: "submit",
+    icon: FileEdit,
+    type: "view",
+    permission: REPORTS.CREATE,
+  },
+
+  // Divider
+  { type: "divider" },
+
+  // Settings
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: SettingsIcon,
+    type: "link",
+    permission: SETTINGS.VIEW,
+  },
+];
 
 export default function DashboardSidebar({ open, onClose }) {
   const { profile, signOut } = useAuth();
   const pathname = usePathname();
   const { activeView, setView, clearView } = useDashboardView();
+  const hasViewReportsPermission = useHasPermission(REPORTS.VIEW_ALL);
+  const hasViewMapPermission = useHasPermission(MAP.VIEW);
+  const hasCreateReportPermission = useHasPermission(REPORTS.CREATE);
+  const hasViewSettingsPermission = useHasPermission(SETTINGS.VIEW);
+  const hasViewAdminPanelPermission = useHasPermission(
+    DASHBOARD.VIEW_ADMIN_PANEL,
+  );
+  const hasViewDistrictPanelPermission = useHasPermission(
+    DASHBOARD.VIEW_DISTRICT_PANEL,
+  );
+  const hasViewNgoPortalPermission = useHasPermission(
+    DASHBOARD.VIEW_NGO_PORTAL,
+  );
+  const hasViewOperatorPanelPermission = useHasPermission(
+    DASHBOARD.VIEW_OPERATOR_PANEL,
+  );
+  const hasViewSupervisorPanelPermission = useHasPermission(
+    DASHBOARD.VIEW_SUPERVISOR_PANEL,
+  );
 
-  const role     = profile?.role ?? "community_officer";
-  const navItems = NAV_BY_ROLE[role] ?? NAV_BY_ROLE.community_officer;
-  const roleMeta = ROLE_META[role] ?? { label: role, color: "bg-gray-100 text-gray-700" };
-  const name     = profile?.full_name || profile?.email?.split("@")[0] || "User";
+  const role = profile?.role ?? ROLES.COMMUNITY_OFFICER;
+  const roleMeta = ROLE_METADATA[role] ?? {
+    label: role,
+    color: "bg-gray-100 text-gray-700",
+  };
+  const name = profile?.full_name || profile?.email?.split("@")[0] || "User";
+
+  // Filter navigation items based on user permissions
+  const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (item.type === "divider") return true;
+    if (!item.permission) return true;
+
+    switch (item.permission) {
+      case REPORTS.VIEW_ALL:
+        return hasViewReportsPermission;
+      case MAP.VIEW:
+        return hasViewMapPermission;
+      case REPORTS.CREATE:
+        return hasCreateReportPermission;
+      case SETTINGS.VIEW:
+        return hasViewSettingsPermission;
+      case DASHBOARD.VIEW_ADMIN_PANEL:
+        return hasViewAdminPanelPermission;
+      case DASHBOARD.VIEW_DISTRICT_PANEL:
+        return hasViewDistrictPanelPermission;
+      case DASHBOARD.VIEW_NGO_PORTAL:
+        return hasViewNgoPortalPermission;
+      case DASHBOARD.VIEW_OPERATOR_PANEL:
+        return hasViewOperatorPanelPermission;
+      case DASHBOARD.VIEW_SUPERVISOR_PANEL:
+        return hasViewSupervisorPanelPermission;
+      default:
+        return true;
+    }
+  });
 
   return (
     <aside
@@ -129,8 +205,12 @@ export default function DashboardSidebar({ open, onClose }) {
             </span>
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
-            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${roleMeta.color}`}>
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {name}
+            </p>
+            <span
+              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${roleMeta.color}`}
+            >
               {roleMeta.label}
             </span>
           </div>
@@ -139,9 +219,11 @@ export default function DashboardSidebar({ open, onClose }) {
 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-3 space-y-0.5">
-        {navItems.map((item, i) => {
+        {visibleNavItems.map((item, i) => {
           if (item.type === "divider") {
-            return <div key={`div-${i}`} className="my-2 border-t border-gray-100" />;
+            return (
+              <div key={`div-${i}`} className="my-2 border-t border-gray-100" />
+            );
           }
 
           const Icon = item.icon;
@@ -158,14 +240,20 @@ export default function DashboardSidebar({ open, onClose }) {
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`} />
+                <Icon
+                  className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`}
+                />
                 <span className="flex-1 text-left truncate">{item.label}</span>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-emerald-500" />}
+                {isActive && (
+                  <ChevronRight className="w-3.5 h-3.5 text-emerald-500" />
+                )}
               </button>
             );
           }
 
-          const isActive = !activeView && (pathname === item.href || pathname?.startsWith(item.href + "/"));
+          const isActive =
+            !activeView &&
+            (pathname === item.href || pathname?.startsWith(item.href + "/"));
           return (
             <Link
               key={item.href}
@@ -177,9 +265,13 @@ export default function DashboardSidebar({ open, onClose }) {
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`} />
+              <Icon
+                className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`}
+              />
               <span className="flex-1 truncate">{item.label}</span>
-              {isActive && <ChevronRight className="w-3.5 h-3.5 text-emerald-500" />}
+              {isActive && (
+                <ChevronRight className="w-3.5 h-3.5 text-emerald-500" />
+              )}
             </Link>
           );
         })}
