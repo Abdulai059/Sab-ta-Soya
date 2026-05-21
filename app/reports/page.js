@@ -13,6 +13,7 @@ import SearchBar from "@/components/reports/SearchBar";
 import ReportsTable from "@/components/reports/ReportsTable";
 import SignInBanner from "@/components/reports/SignInBanner";
 import Pagination from "@/components/reports/Pagination";
+import ReportsSkeleton from "@/components/reports/ReportsSkeleton";
 
 export default function ReportsPage() {
   const { profile } = useAuth();
@@ -44,17 +45,11 @@ export default function ReportsPage() {
     { id: "climate", label: "Climate-linked", icon: Cloud },
   ];
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-      </div>
-    );
-  }
+  if (loading) return <ReportsSkeleton />;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1500px] mx-auto">
+      <div className="max-w-[1500px] pt-10 mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Sanitation reports

@@ -28,12 +28,22 @@ const ReportDetail = dynamic(() => import("@/app/reports/[id]/page"), {
   ssr: false,
   loading: () => <Loader label="report" />,
 });
+const AssignWorkerPage = dynamic(() => import("@/components/admin/AssignWorkerPage"), {
+  ssr: false,
+  loading: () => <Loader label="assignments" />,
+});
+const WorkerOffersPage = dynamic(() => import("@/components/admin/WorkerOffersPage"), {
+  ssr: false,
+  loading: () => <Loader label="offers" />,
+});
 
 const VIEW_COMPONENTS = {
   map: MapPage,
   reports: ReportsPage,
   submit: SubmitPage,
   reportDetail: ReportDetail,
+  assignWorker: AssignWorkerPage,
+  workerOffers: WorkerOffersPage,
 };
 
 export default function DashboardShell({ children }) {
@@ -128,6 +138,8 @@ export default function DashboardShell({ children }) {
                       reports: "Reports",
                       submit: "Submit Issue",
                       reportDetail: "Report Detail",
+                      assignWorker: "Assign Workers",
+                      workerOffers: "Worker Offers",
                     }[activeView]
                   : "Dashboard"}
               </span>

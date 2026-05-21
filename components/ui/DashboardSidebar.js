@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardView } from "@/context/DashboardViewContext";
-import { useHasPermission } from "@/hooks/usePermissions";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   DASHBOARD,
   REPORTS,
@@ -25,6 +25,8 @@ import {
   Landmark,
   Handshake,
   Users,
+  UserCheck,
+  ClipboardCheck,
   ChevronRight,
   X,
 } from "lucide-react";
@@ -54,6 +56,20 @@ const NAV_GROUPS = [
         view: "reports",
         icon: ClipboardList,
         permission: REPORTS.VIEW_ALL,
+        type: "view",
+      },
+      {
+        label: "Assign Workers",
+        view: "assignWorker",
+        icon: UserCheck,
+        permission: REPORTS.ASSIGN,
+        type: "view",
+      },
+      {
+        label: "Worker Offers",
+        view: "workerOffers",
+        icon: ClipboardCheck,
+        permission: REPORTS.ASSIGN,
         type: "view",
       },
       {
@@ -124,8 +140,9 @@ export default function DashboardSidebar({ open, onClose }) {
   const { profile, signOut } = useAuth();
   const pathname = usePathname();
   const { activeView, setView, clearView } = useDashboardView();
+  const userPermissions = usePermissions();
 
-  const hasPermission = useHasPermission;
+  const hasPermission = (permission) => userPermissions.includes(permission);
 
   const role = profile?.role ?? ROLES.COMMUNITY_OFFICER;
   const roleMeta = ROLE_METADATA[role] ?? {

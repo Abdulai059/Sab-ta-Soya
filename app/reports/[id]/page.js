@@ -12,6 +12,7 @@ import AssignmentsList from "@/components/reports/detail/AssignmentsList";
 import StatusHistory from "@/components/reports/detail/StatusHistory";
 import QuickActions from "@/components/reports/detail/QuickActions";
 import LocationImages from "@/components/reports/detail/LocationImages";
+import ReportDetailSkeleton from "@/components/reports/detail/ReportDetailSkeleton";
 
 export default function ReportDetailPage() {
   const { profile } = useAuth();
@@ -20,10 +21,10 @@ export default function ReportDetailPage() {
   const dashCtx = useDashboardView();
   const isInDashboard = !!dashCtx?.goBack;
 
-  // Use id from dashboard context params if inside dashboard, else from URL
   const reportId = isInDashboard ? dashCtx.viewParams?.id : params?.id;
 
-  const { report, assignments, statusHistory, locationImages, loading } = useReportDetail(reportId);
+  const { report, assignments, statusHistory, locationImages, loading } =
+    useReportDetail(reportId);
 
   const handleBack = () => {
     if (isInDashboard) {
@@ -33,13 +34,7 @@ export default function ReportDetailPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
-      </div>
-    );
-  }
+  if (loading) return <ReportDetailSkeleton />;
 
   if (!report) {
     return (
@@ -60,7 +55,7 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:pt-30 pt-0 ">
+    <div className="min-h-screen bg-gray-50 p-6 md:pt-30 pt-0">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={handleBack}
