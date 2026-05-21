@@ -1,5 +1,11 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -15,7 +21,77 @@ export const AuthProvider = ({ children }) => {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
+  const createProfile = async (userId) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      let userRole = "community_officer";
+      if (
+        user?.email &&
+        (user.email.endsWith("@admin.com") || user.email.includes("admin"))
+      ) {
+        userRole = "admin";
+      } else if (user?.email?.includes("district")) {
+        userRole = "district_officer";
+      } else if (user?.email?.includes("ngo")) {
+        userRole = "ngo";
+      } else if (user?.email?.includes("health")) {
+        userRole = "health_officer";
+      } else if (user?.email?.includes("supervisor")) {
+        userRole = "supervisor";
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .insert([
+          {
+            id: userId,
+            full_name: user?.email?.split("@")[0] ?? "User",
+            email: user?.email,
+            role: userRole,
+          },
+        ])
+        .select()
+        .single();
+
+      if (data) {
+        setProfile(data);
+        return data;
+      } else if (error) {
+        console.error("Error creating profile:", error);
+      }
+    } catch (error) {
+      console.error("Error in createProfile:", error);
+    }
+    return null;
+  };
+
+  const fetchProfile = useCallback(async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (data) {
+        setProfile(data);
+        return data;
+      } else if (error?.code === "PGRST116") {
+        return await createProfile(userId);
+      } else if (error) {
+        console.error("Error fetching profile:", error);
+      }
+    } catch (error) {
+      console.error("Error in fetchProfile:", error);
+    }
+    return null;
+  }, []);
+
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const getSession = async () => {
       try {
@@ -43,7 +119,11 @@ export const AuthProvider = ({ children }) => {
       try {
         if (session?.user) {
           setUser(session.user);
-          await fetchProfile(session.user.id);
+          const profileData = await fetchProfile(session.user.id);
+
+          if (event === "SIGNED_IN" && profileData) {
+            // redirect handled by login page
+          }
         } else {
           setUser(null);
           setProfile(null);
@@ -56,63 +136,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchProfile = async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (data) {
-        setProfile(data);
-      } else if (error?.code === "PGRST116") {
-        await createProfile(userId);
-      } else if (error) {
-        console.error("Error fetching profile:", error);
-      }
-    } catch (error) {
-      console.error("Error in fetchProfile:", error);
-    }
-  };
-
-  const createProfile = async (userId) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      let userRole = "operator";
-      if (
-        user?.email &&
-        (user.email.endsWith("@admin.com") || user.email.includes("admin"))
-      ) {
-        userRole = "admin";
-      }
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: userId,
-            email: user?.email,
-            role: userRole,
-          },
-        ])
-        .select()
-        .single();
-
-      if (data) {
-        setProfile(data);
-      } else if (error) {
-        console.error("Error creating profile:", error);
-      }
-    } catch (error) {
-      console.error("Error in createProfile:", error);
-    }
-  };
+  }, [fetchProfile]);
 
   const signUp = async (email, password) => {
     try {
@@ -123,7 +147,10 @@ export const AuthProvider = ({ children }) => {
 
       if (signInData?.user) {
         toast.error("User already exists. Please log in instead.");
-        return { error: { message: "User already exists" }, shouldRedirectToLogin: true };
+        return {
+          error: { message: "User already exists" },
+          shouldRedirectToLogin: true,
+        };
       }
 
       const { data, error } = await supabase.auth.signUp({
@@ -135,7 +162,10 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (error) {
-        if (error.message.includes("already registered") || error.message.includes("already exists")) {
+        if (
+          error.message.includes("already registered") ||
+          error.message.includes("already exists")
+        ) {
           toast.error("User already exists. Please log in instead.");
           return { error, shouldRedirectToLogin: true };
         }
@@ -144,25 +174,27 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (data?.user) {
-        let userRole = "operator";
-        
+        let userRole = "community_officer";
+
         if (email.endsWith("@admin.com") || email.includes("admin")) {
           userRole = "admin";
         } else if (email.includes("district")) {
           userRole = "district_officer";
         } else if (email.includes("ngo")) {
           userRole = "ngo";
+        } else if (email.includes("health")) {
+          userRole = "health_officer";
+        } else if (email.includes("supervisor")) {
+          userRole = "supervisor";
         }
 
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert([
-            {
-              id: data.user.id,
-              email: email,
-              role: userRole,
-            },
-          ]);
+        const { error: profileError } = await supabase.from("profiles").insert([
+          {
+            id: data.user.id,
+            email: email,
+            role: userRole,
+          },
+        ]);
 
         if (profileError) {
           console.error("Error creating profile:", profileError);
@@ -205,7 +237,7 @@ export const AuthProvider = ({ children }) => {
 
         setProfile(profileData);
         toast.success("Signed in successfully!");
-        
+
         return { data, profile: profileData };
       }
 
@@ -246,9 +278,16 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     isAdmin: profile?.role === "admin",
-    isOperator: profile?.role === "operator",
     isDistrictOfficer: profile?.role === "district_officer",
+    isCommunityOfficer: profile?.role === "community_officer",
+    isHealthOfficer: profile?.role === "health_officer",
     isNGO: profile?.role === "ngo",
+    isResponseTeam: profile?.role === "response_team",
+    isHeadteacher: profile?.role === "headteacher",
+    isCommunityAgent: profile?.role === "community_agent",
+    isSanitationWorker: profile?.role === "sanitation_worker",
+    isFieldWorker: profile?.role === "field_worker",
+    isSupervisor: profile?.role === "supervisor",
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

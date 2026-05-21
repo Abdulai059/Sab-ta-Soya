@@ -1,15 +1,14 @@
 "use client";
 
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
-import DashboardNav from "@/components/ui/DashboardNav";
+import DashboardShell from "@/components/ui/DashboardShell";
 
 export default function DashboardLayout({ children }) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
-        <DashboardNav />
+      <DashboardShell>
         {children}
-      </div>
+      </DashboardShell>
     </ProtectedRoute>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 export function useMapSearch(locations = [], communities = []) {
   const [query, setQuery] = useState("");
@@ -9,11 +9,15 @@ export function useMapSearch(locations = [], communities = []) {
   const searchRef = useRef(null);
 
   // Merge locations and communities into a single searchable dataset
-  const dataset = [
-    ...locations.map((l) => ({ ...l, category: "Infrastructure" })),
-    ...communities.map((c) => ({ ...c, category: "Community" })),
-  ];
+  const dataset = useMemo(
+    () => [
+      ...locations.map((l) => ({ ...l, category: "Infrastructure" })),
+      ...communities.map((c) => ({ ...c, category: "Community" })),
+    ],
+    [locations, communities],
+  );
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     const q = query.trim().toLowerCase();
     if (!q) {
@@ -30,7 +34,7 @@ export function useMapSearch(locations = [], communities = []) {
       .slice(0, 8);
     setResults(filtered);
     setShowResults(true);
-  }, [query, locations, communities]);
+  }, [query, dataset]);
 
   const clearSearch = useCallback(() => {
     setQuery("");

@@ -269,28 +269,16 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { error, profile } = await signIn(email, password);
-    
-    if (!error && profile) {
+    const result = await signIn(email, password);
+    if (!result.error) {
       if (onCloseModal) onCloseModal();
-      
-      // Redirect based on user role
-      switch (profile.role) {
-        case "admin":
-          router.push("/admin");
-          break;
-        case "operator":
-          router.push("/operator");
-          break;
-        case "district_officer":
-          router.push("/district-officer");
-          break;
-        case "ngo":
-          router.push("/ngo");
-          break;
-        default:
-          router.push("/dashboard");
-      }
+      const roleRoutes = {
+        admin:             "/admin",
+        district_officer:  "/district-officer",
+        ngo:               "/ngo",
+      };
+      const destination = roleRoutes[result.profile?.role] ?? "/operator";
+      router.push(destination);
     }
     setLoading(false);
   };

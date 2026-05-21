@@ -11,19 +11,20 @@ export const metadata = {
   description:
     "Comprehensive sanitation incident tracking and management for Northern Ghana",
   manifest: "/manifest.json",
-  themeColor: "#10b981",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "SaniTrack",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#10b981",
 };
 
 export default function RootLayout({ children }) {
