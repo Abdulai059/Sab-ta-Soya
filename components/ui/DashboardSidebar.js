@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardView } from "@/context/DashboardViewContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useMyOfferCount } from "@/hooks/useMyOfferCount";
 import {
   DASHBOARD,
   REPORTS,
@@ -27,6 +28,7 @@ import {
   Users,
   UserCheck,
   ClipboardCheck,
+  Bell,
   ChevronRight,
   X,
 } from "lucide-react";
@@ -70,6 +72,15 @@ const NAV_GROUPS = [
         view: "workerOffers",
         icon: ClipboardCheck,
         permission: REPORTS.ASSIGN,
+        type: "view",
+      },
+      {
+        // Visible to workers (VIEW_ASSIGNED) but NOT to admins/supervisors (ASSIGN)
+        label: "My Offers",
+        view: "myOffers",
+        icon: Bell,
+        permission: REPORTS.VIEW_ASSIGNED,
+        excludePermission: REPORTS.ASSIGN,
         type: "view",
       },
       {
@@ -141,6 +152,7 @@ export default function DashboardSidebar({ open, onClose }) {
   const pathname = usePathname();
   const { activeView, setView, clearView } = useDashboardView();
   const userPermissions = usePermissions();
+  const pendingOfferCount = useMyOfferCount();
 
   const hasPermission = (permission) => userPermissions.includes(permission);
 
@@ -159,7 +171,9 @@ export default function DashboardSidebar({ open, onClose }) {
   const filteredGroups = NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter(
-      (item) => !item.permission || hasPermission(item.permission)
+      (item) =>
+        (!item.permission || hasPermission(item.permission)) &&
+        (!item.excludePermission || !hasPermission(item.excludePermission))
     ),
   })).filter((g) => g.items.length > 0);
 
@@ -242,6 +256,11 @@ export default function DashboardSidebar({ open, onClose }) {
                       <span className="flex-1 text-left truncate">
                         {item.label}
                       </span>
+                      {item.view === "myOffers" && pendingOfferCount > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-100 text-red-600 min-w-[18px] text-center">
+                          {pendingOfferCount}
+                        </span>
+                      )}
                     </button>
                   );
                 }

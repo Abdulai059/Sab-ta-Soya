@@ -36,6 +36,10 @@ const WorkerOffersPage = dynamic(() => import("@/components/admin/WorkerOffersPa
   ssr: false,
   loading: () => <Loader label="offers" />,
 });
+const MyOffersPage = dynamic(() => import("@/components/worker/MyOffersPage"), {
+  ssr: false,
+  loading: () => <Loader label="my offers" />,
+});
 
 const VIEW_COMPONENTS = {
   map: MapPage,
@@ -44,6 +48,7 @@ const VIEW_COMPONENTS = {
   reportDetail: ReportDetail,
   assignWorker: AssignWorkerPage,
   workerOffers: WorkerOffersPage,
+  myOffers: MyOffersPage,
 };
 
 export default function DashboardShell({ children }) {
@@ -140,6 +145,7 @@ export default function DashboardShell({ children }) {
                       reportDetail: "Report Detail",
                       assignWorker: "Assign Workers",
                       workerOffers: "Worker Offers",
+                      myOffers: "My Offers",
                     }[activeView]
                   : "Dashboard"}
               </span>

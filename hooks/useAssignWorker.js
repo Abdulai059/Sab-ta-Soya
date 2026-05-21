@@ -12,8 +12,9 @@ export function useAssignWorker() {
   const [loading, setLoading] = useState(true);
   const [assigning, setAssigning] = useState(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  // silent=true → background refresh, don't show skeleton
+  const fetchData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [{ data: reportData, error: rErr }, { data: workerData, error: wErr }] =
         await Promise.all([
@@ -57,7 +58,7 @@ export function useAssignWorker() {
       toast.error("Failed to load data");
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -147,93 +148,72 @@ export function useAssignWorker() {
       );
 
       toast.success("Worker assigned — offer sent, 30 min to accept");
-      
-      // 5. Refresh from server to ensure consistency
-      await fetchData();
+      // No fetchData here — optimistic update already reflects the correct state
     } catch (err) {
       toast.error(`Failed to assign worker: ${err.message}`);
       console.error("Assign error:", err);
-      // Refresh even on error to show current state
-      await fetchData();
+      // Only re-fetch on error to rollback
+      await fetchData(true);
     } finally {
       setAssigning(null);
     }
   };
 
   const unassignWorker = async (assignmentId, reportId) => {
+    // 1. Optimistic update — remove from UI immediately before any network call
+    setReports((prev) =>
+      prev.map((report) => {
+        if (report.id !== reportId) return report;
+        const updatedAssignments = (report.report_assignments || []).filter(
+          (a) => a.id !== assignmentId
+        );
+        return {
+          ...report,
+          report_assignments: updatedAssignments,
+          status: updatedAssignments.length === 0 ? "pending" : report.status,
+        };
+      })
+    );
+
     try {
-      // 1. Delete linked service tasks first (FK constraint)
+      // 2. Delete linked service tasks first (FK constraint)
       const { error: taskDeleteError } = await supabase
         .from("service_tasks")
         .delete()
         .eq("report_assignment_id", assignmentId);
 
-      if (taskDeleteError) {
-        console.error("Error deleting service tasks:", taskDeleteError);
-        throw taskDeleteError;
-      }
+      if (taskDeleteError) throw taskDeleteError;
 
-      // 2. Delete the assignment
+      // 3. Delete the assignment
       const { error: assignmentDeleteError } = await supabase
         .from("report_assignments")
         .delete()
         .eq("id", assignmentId);
 
-      if (assignmentDeleteError) {
-        console.error("Error deleting assignment:", assignmentDeleteError);
-        throw assignmentDeleteError;
-      }
+      if (assignmentDeleteError) throw assignmentDeleteError;
 
-      // 3. Check if any assignments remain for this report
-      const { data: remaining, error: checkError } = await supabase
+      // 4. Update report status to pending if no assignments remain
+      const { data: remaining } = await supabase
         .from("report_assignments")
         .select("id")
         .eq("report_id", reportId);
 
-      if (checkError) {
-        console.error("Error checking remaining assignments:", checkError);
-      }
-
-      // 4. If no assignments remain, revert report status to pending
       if (!remaining || remaining.length === 0) {
-        const { error: statusError } = await supabase
+        await supabase
           .from("sanitation_reports")
           .update({ status: "pending", updated_at: new Date().toISOString() })
           .eq("id", reportId);
-
-        if (statusError) {
-          console.error("Error updating report status:", statusError);
-        }
       }
 
-      // 5. Immediately update local state to reflect the change
-      setReports((prevReports) =>
-        prevReports.map((report) => {
-          if (report.id === reportId) {
-            const updatedAssignments = report.report_assignments.filter(
-              (a) => a.id !== assignmentId
-            );
-            return {
-              ...report,
-              report_assignments: updatedAssignments,
-              status: updatedAssignments.length === 0 ? "pending" : report.status,
-            };
-          }
-          return report;
-        })
-      );
-
-      toast.success("Worker removed successfully");
-      
-      // 6. Refresh data from server to ensure consistency
-      await fetchData();
+      toast.success("Worker removed");
+      // No fetchData here — optimistic update already reflects the correct state
     } catch (err) {
       toast.error(`Failed to remove worker: ${err.message}`);
       console.error("Unassign error:", err);
-      // Refresh data even on error to show current state
-      await fetchData();
+      // Only re-fetch on actual error to rollback the optimistic update
+      await fetchData(true);
     }
   };
 
-  return { reports, workers, loading, assigning, assignWorker, unassignWorker, refresh: fetchData };
+  return { reports, workers, loading, assigning, assignWorker, unassignWorker, refresh: () => fetchData(false) };
 }
