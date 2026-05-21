@@ -99,7 +99,7 @@ export default function DashboardShell({ children }) {
           />
 
           {/* Main content */}
-          <div className="flex-1 lg:ml-56 min-h-screen bg-gray-50 overflow-y-auto">
+          <div className="flex-1 lg:ml-64 min-h-screen bg-gray-50 overflow-y-auto">
             {/* Mobile top bar with hamburger */}
             <div className="lg:hidden sticky top-16 z-20 flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
               <button
@@ -133,7 +133,7 @@ export default function DashboardShell({ children }) {
               </span>
             </div>
 
-            <div className="p-4 sm:p-6">
+            <div className="p-4 sm:p-6 pt-4">
               {ActiveComponent ? <ActiveComponent /> : children}
             </div>
           </div>

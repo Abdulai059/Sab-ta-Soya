@@ -111,11 +111,12 @@ body {
 
 /* Mobile touch improvements */
 @media (max-width: 768px) {
-  /* Improve tap targets */
-  button,
-  a {
+  /* Improve tap targets — only top-level interactive elements, not inline badges */
+  nav button,
+  nav a,
+  form button,
+  .btn {
     min-height: 44px;
-    min-width: 44px;
   }
 
   /* Smooth scrolling on mobile */

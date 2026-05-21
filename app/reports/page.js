@@ -69,7 +69,11 @@ export default function ReportsPage() {
           <StatsCard value={stats.pending} label="Pending" color="yellow" />
           <StatsCard value={stats.assigned} label="Assigned" color="blue" />
           <StatsCard value={stats.resolved} label="Completed" color="emerald" />
-          <StatsCard value={stats.critical} label="Critical / health risk" color="red" />
+          <StatsCard
+            value={stats.critical}
+            label="Critical / health risk"
+            color="red"
+          />
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6 mt-4 bg-white">

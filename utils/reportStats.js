@@ -4,7 +4,7 @@ export function calculateReportStats(reports) {
   const assigned = reports.filter((r) => r.status === "assigned").length;
   const resolved = reports.filter((r) => r.status === "completed").length;
   const critical = reports.filter(
-    (r) => r.severity === "critical" || r.health_risk
+    (r) => r.severity === "critical" || r.health_risk,
   ).length;
 
   return { total, pending, assigned, resolved, critical };
