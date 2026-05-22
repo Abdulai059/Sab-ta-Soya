@@ -38,15 +38,10 @@ export default function ReportDetailPage() {
 
   if (!report) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Report not found
-          </h2>
-          <button
-            onClick={handleBack}
-            className="text-emerald-600 hover:text-emerald-700"
-          >
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Report not found</h2>
+          <button onClick={handleBack} className="text-emerald-600 hover:text-emerald-700 text-sm">
             ← Back to reports
           </button>
         </div>
@@ -55,15 +50,14 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:pt-30 pt-0">
-      <div className="max-w-6xl mx-auto">
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to reports
-        </button>
+    <div className="max-w-6xl mx-auto space-y-6">
+      <button
+        onClick={handleBack}
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to reports
+      </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -86,7 +80,6 @@ export default function ReportDetailPage() {
             <QuickActions profile={profile} />
           </div>
         </div>
-      </div>
     </div>
   );
 }

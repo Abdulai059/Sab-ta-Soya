@@ -1,44 +1,43 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
+import { getDerivedStatus } from "@/utils/reportStatus";
 
 export function useReportFilters(reports) {
-  const [filteredReports, setFilteredReports] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery]   = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const filterReports = useCallback(() => {
-    let filtered = [...reports];
+  const filteredReports = useMemo(() => {
+    let filtered = reports;
 
-    if (activeFilter === "pending") {
-      filtered = filtered.filter(
-        (r) => r.status === "pending" || r.status === "assigned",
-      );
-    } else if (activeFilter === "resolved") {
-      filtered = filtered.filter((r) => r.status === "completed");
+    // Filter on derived status so service_tasks drives the result
+    if (activeFilter !== "all" && activeFilter !== "critical" && activeFilter !== "climate") {
+      filtered = filtered.filter((r) => {
+        const derived = getDerivedStatus(r);
+        if (activeFilter === "pending")     return derived === "pending";
+        if (activeFilter === "offer_sent")  return derived === "offer_sent";
+        if (activeFilter === "in_progress") return derived === "in_progress";
+        if (activeFilter === "resolved")    return derived === "completed" || derived === "resolved";
+        return true;
+      });
     } else if (activeFilter === "critical") {
-      filtered = filtered.filter(
-        (r) => r.severity === "critical" || r.health_risk,
-      );
+      filtered = filtered.filter((r) => r.severity?.toLowerCase() === "critical" || r.health_risk);
     } else if (activeFilter === "climate") {
       filtered = filtered.filter((r) => r.climate_event_id);
     }
 
-    if (searchQuery) {
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (r) =>
-          r.reference_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.issue_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.community?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+          r.reference_id?.toLowerCase().includes(q) ||
+          r.issue_type?.toLowerCase().includes(q) ||
+          r.location?.name?.toLowerCase().includes(q) ||
+          r.community?.name?.toLowerCase().includes(q)
       );
     }
 
-    setFilteredReports(filtered);
+    return filtered;
   }, [reports, activeFilter, searchQuery]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    filterReports();
-  }, [filterReports]);
 
   return {
     filteredReports,

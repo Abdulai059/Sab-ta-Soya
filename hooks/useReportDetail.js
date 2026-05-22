@@ -37,12 +37,14 @@ async function fetchReportDetail(reportId) {
     locationImages = imagesData || [];
   }
 
-  // Assignments
+  // Assignments — include service_tasks so we can show task progress
   const { data: assignmentsData } = await supabase
     .from("report_assignments")
     .select(
-      `*, assigned_to_profile:profiles!assigned_to(full_name, phone, role),
-           assigned_by_profile:profiles!assigned_by(full_name, role)`
+      `id, assigned_at, arrived_at, resolved_at, notes,
+       assigned_to_profile:profiles!assigned_to(full_name, phone, role),
+       assigned_by_profile:profiles!assigned_by(full_name, role),
+       service_tasks(id, status, task_type, created_at, started_at, completed_at)`
     )
     .eq("report_id", reportId)
     .order("assigned_at", { ascending: false });

@@ -77,7 +77,7 @@ export default function ReportsSkeleton() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {["Ref ID", "Issue / Location", "Severity", "Status", "Reported", "Location", "Actions"].map((h) => (
+                  {["Ref ID", "Issue / Location", "Severity", "Status", "Assigned To", "Reported", "Location", "Actions"].map((h) => (
                     <th key={h} className="px-5 py-4 text-left">
                       <Bone className="w-16 h-3" />
                     </th>

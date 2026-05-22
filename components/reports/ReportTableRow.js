@@ -1,11 +1,92 @@
-import { Eye, Lock, MapPin } from "lucide-react";
+import { Eye, Lock, MapPin, UserCheck, Clock, CheckCircle, ShieldCheck, Send, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { navigateTo } from "@/utils/navigateTo";
 import { useDashboardView } from "@/context/DashboardViewContext";
+import { getDerivedStatus } from "@/utils/reportStatus";
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
+const STATUS_CONFIG = {
+  pending:     { Icon: Clock,      dot: "bg-yellow-400", bg: "bg-yellow-50",  border: "border-yellow-200", text: "text-yellow-700",  label: "Pending"     },
+  assigned:    { Icon: UserCheck,  dot: "bg-blue-400",   bg: "bg-blue-50",    border: "border-blue-200",   text: "text-blue-700",    label: "Assigned"    },
+  offer_sent:  { Icon: Send,       dot: "bg-amber-400",  bg: "bg-amber-50",   border: "border-amber-200",  text: "text-amber-700",   label: "Offer Sent"  },
+  in_progress: { Icon: Loader2,    dot: "bg-indigo-400", bg: "bg-indigo-50",  border: "border-indigo-200", text: "text-indigo-700",  label: "In Progress" },
+  completed:   { Icon: ShieldCheck,dot: "bg-emerald-500",bg: "bg-emerald-50", border: "border-emerald-200",text: "text-emerald-700", label: "Completed"   },
+  resolved:    { Icon: ShieldCheck,dot: "bg-emerald-500",bg: "bg-emerald-50", border: "border-emerald-200",text: "text-emerald-700", label: "Resolved"    },
+  cancelled:   { Icon: Clock,      dot: "bg-red-400",    bg: "bg-red-50",     border: "border-red-200",    text: "text-red-700",     label: "Cancelled"   },
+};
+
+function StatusBadge({ status }) {
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
+  const { Icon, dot, bg, border, text, label } = cfg;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${bg} ${border} ${text}`}>
+      {/* Animated dot for active states */}
+      <span className="relative flex h-2 w-2 shrink-0">
+        {(status === "in_progress" || status === "offer_sent") && (
+          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${dot} opacity-60`} />
+        )}
+        <span className={`relative inline-flex rounded-full h-2 w-2 ${dot}`} />
+      </span>
+      <Icon className="w-3 h-3 shrink-0" />
+      {label}
+    </span>
+  );
+}
+
+// ─── Worker cell ──────────────────────────────────────────────────────────────
+
+function getAssignment(report) {
+  const assignment = (report.report_assignments || [])[0];
+  if (!assignment) return null;
+  const task = (assignment.service_tasks || [])[0];
+  return { worker: assignment.worker, taskStatus: task?.status ?? null };
+}
+
+function WorkerCell({ report }) {
+  const assignment = getAssignment(report);
+
+  if (!assignment) {
+    return <span className="text-xs text-gray-300">—</span>;
+  }
+
+  const { worker, taskStatus } = assignment;
+  const name    = worker?.full_name ?? "Unknown";
+  const initial = name.charAt(0).toUpperCase();
+
+  const config =
+    taskStatus === "completed"
+      ? { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", Icon: ShieldCheck, iconColor: "text-emerald-500", label: "Completed"   }
+      : taskStatus === "in_progress"
+      ? { bg: "bg-indigo-50",  text: "text-indigo-700",  border: "border-indigo-200",  Icon: CheckCircle, iconColor: "text-indigo-500",  label: "In progress" }
+      : taskStatus === "pending"
+      ? { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-200",   Icon: Clock,       iconColor: "text-amber-500",   label: "Offer sent"  }
+      : { bg: "bg-gray-50",    text: "text-gray-600",    border: "border-gray-200",    Icon: UserCheck,   iconColor: "text-gray-400",    label: "Assigned"    };
+
+  const { bg, text, border, Icon, iconColor, label } = config;
+
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border ${bg} ${border} max-w-[160px]`}>
+      <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex items-center justify-center shrink-0">
+        {initial}
+      </div>
+      <div className="min-w-0">
+        <p className={`text-xs font-semibold truncate ${text}`}>{name}</p>
+        <div className={`flex items-center gap-0.5 ${iconColor}`}>
+          <Icon className="w-2.5 h-2.5 shrink-0" />
+          <span className="text-[10px] font-medium">{label}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Row ──────────────────────────────────────────────────────────────────────
 
 export default function ReportTableRow({ report, profile, formatTimeAgo }) {
-  const router = useRouter();
-  const dashCtx = useDashboardView();
+  const router   = useRouter();
+  const dashCtx  = useDashboardView();
   const isInDashboard = !!dashCtx?.setView;
 
   const handleView = () => {
@@ -26,15 +107,8 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "pending":   return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "assigned":  return "bg-blue-50 text-blue-700 border-blue-200";
-      case "completed": return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "cancelled": return "bg-red-50 text-red-700 border-red-200";
-      default:          return "bg-gray-50 text-gray-600 border-gray-200";
-    }
-  };
+  // Derive the true status from service_tasks, not just report.status
+  const derivedStatus = getDerivedStatus(report);
 
   const cell = "px-5 py-3.5 border-r border-gray-300 last:border-r-0";
 
@@ -65,10 +139,14 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
         </span>
       </td>
 
+      {/* ── Derived status — reads from service_tasks first ─────── */}
       <td className={`${cell} whitespace-nowrap`}>
-        <span className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-medium border ${getStatusColor(report.status)}`}>
-          {report.status}
-        </span>
+        <StatusBadge status={derivedStatus} />
+      </td>
+
+      {/* ── Assigned worker ──────────────────────────────────────── */}
+      <td className={`${cell} whitespace-nowrap`}>
+        <WorkerCell report={report} />
       </td>
 
       <td className={`${cell} whitespace-nowrap text-xs text-gray-400`}>

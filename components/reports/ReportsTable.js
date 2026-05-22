@@ -20,6 +20,9 @@ export default function ReportsTable({ reports, profile, formatTimeAgo }) {
                 Status
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Assigned To
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Reported
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -33,7 +36,7 @@ export default function ReportsTable({ reports, profile, formatTimeAgo }) {
           <tbody className="divide-y divide-gray-200">
             {reports.length === 0 ? (
               <tr>
-                <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
                   No reports found
                 </td>
               </tr>

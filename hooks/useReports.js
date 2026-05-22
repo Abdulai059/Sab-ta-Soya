@@ -13,7 +13,12 @@ async function fetchReports() {
        location:locations(name, area_name, landmark, latitude, longitude),
        community:communities(name, district, region),
        reported_by_profile:profiles!reported_by(full_name, phone),
-       climate_event:climate_events(event_type, severity)`
+       climate_event:climate_events(event_type, severity),
+       report_assignments(
+         id,
+         worker:profiles!report_assignments_assigned_to_fkey(id, full_name, role),
+         service_tasks(id, status)
+       )`
     )
     .order("created_at", { ascending: false });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Clock, CheckCircle, AlertTriangle, Cloud, List } from "lucide-react";
+import { Clock, CheckCircle, AlertTriangle, Cloud, List, Send, Loader } from "lucide-react";
 import { useReports } from "@/hooks/useReports";
 import { useReportFilters } from "@/hooks/useReportFilters";
 import { usePagination } from "@/hooks/usePagination";
@@ -38,18 +38,19 @@ export default function ReportsPage() {
   const stats = calculateReportStats(reports);
 
   const filters = [
-    { id: "all", label: "All", icon: List },
-    { id: "pending", label: "Pending", icon: Clock },
-    { id: "resolved", label: "Completed", icon: CheckCircle },
-    { id: "critical", label: "Critical", icon: AlertTriangle },
-    { id: "climate", label: "Climate-linked", icon: Cloud },
+    { id: "all",         label: "All",         icon: List          },
+    { id: "pending",     label: "Pending",     icon: Clock         },
+    { id: "offer_sent",  label: "Offer Sent",  icon: Send          },
+    { id: "in_progress", label: "In Progress", icon: Loader        },
+    { id: "resolved",    label: "Completed",   icon: CheckCircle   },
+    { id: "critical",    label: "Critical",    icon: AlertTriangle },
+    { id: "climate",     label: "Climate",     icon: Cloud         },
   ];
 
   if (loading) return <ReportsSkeleton />;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1500px] mx-auto">
+    <div className="max-w-[1500px] mx-auto space-y-6">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Sanitation reports
@@ -59,16 +60,13 @@ export default function ReportsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <StatsCard value={stats.total} label="Total reports" color="gray" />
-          <StatsCard value={stats.pending} label="Pending" color="yellow" />
-          <StatsCard value={stats.assigned} label="Assigned" color="blue" />
-          <StatsCard value={stats.resolved} label="Completed" color="emerald" />
-          <StatsCard
-            value={stats.critical}
-            label="Critical / health risk"
-            color="red"
-          />
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+          <StatsCard value={stats.total}      label="Total"       color="gray"    />
+          <StatsCard value={stats.pending}    label="Pending"     color="yellow"  />
+          <StatsCard value={stats.offerSent}  label="Offer Sent"  color="orange"  />
+          <StatsCard value={stats.inProgress} label="In Progress" color="blue"    />
+          <StatsCard value={stats.resolved}   label="Completed"   color="emerald" />
+          <StatsCard value={stats.critical}   label="Critical"    color="red"     />
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6 mt-4 bg-white">
@@ -106,7 +104,6 @@ export default function ReportsPage() {
         />
 
         {!profile && <SignInBanner />}
-      </div>
     </div>
   );
 }
