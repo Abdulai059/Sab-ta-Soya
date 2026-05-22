@@ -64,7 +64,7 @@ function WorkerRowSkeleton() {
 
 export default function DashboardSkeleton() {
   return (
-    <div className="space-y-5 max-w-[1400px] pt-15 mx-auto animate-pulse">
+    <div className="space-y-5 max-w-[1400px] mx-auto animate-pulse">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">

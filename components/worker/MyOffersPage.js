@@ -357,7 +357,7 @@ function OfferCard({ offer, onAccept, onReject, onComplete }) {
 
 function MyOffersSkeleton() {
   return (
-    <div className="space-y-5 animate-pulse pt-20">
+    <div className="space-y-5 animate-pulse">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <div className="skeleton rounded-lg w-44 h-7" />
@@ -438,7 +438,7 @@ export default function MyOffersPage() {
   const totalPending = pending.length + expired.length;
 
   return (
-    <div className="space-y-5 pt-20">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>

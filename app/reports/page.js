@@ -49,7 +49,7 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1500px] pt-10 mx-auto">
+      <div className="max-w-[1500px] mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold text-gray-900 mb-2">
             Sanitation reports

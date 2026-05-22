@@ -1,42 +1,41 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
 import toast from "react-hot-toast";
 
+async function fetchReports() {
+  const { data, error } = await supabase
+    .from("sanitation_reports")
+    .select(
+      `*,
+       location:locations(name, area_name, landmark, latitude, longitude),
+       community:communities(name, district, region),
+       reported_by_profile:profiles!reported_by(full_name, phone),
+       climate_event:climate_events(event_type, severity)`
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    toast.error("Failed to load reports");
+    throw error;
+  }
+
+  return data || [];
+}
+
 export function useReports() {
-  const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
 
-  const fetchReports = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("sanitation_reports")
-        .select(
-          `
-          *,
-          location:locations(name, area_name, landmark, latitude, longitude),
-          community:communities(name, district, region),
-          reported_by_profile:profiles!reported_by(full_name, phone),
-          climate_event:climate_events(event_type, severity)
-        `,
-        )
-        .order("created_at", { ascending: false });
+  const { data: reports = [], isLoading: loading } = useQuery({
+    queryKey: QUERY_KEYS.reports,
+    queryFn: fetchReports,
+  });
 
-      if (error) throw error;
-
-      setReports(data || []);
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error("Failed to load reports");
-    } finally {
-      setLoading(false);
-    }
+  return {
+    reports,
+    loading,
+    refetch: () => qc.invalidateQueries({ queryKey: QUERY_KEYS.reports }),
   };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchReports();
-  }, []);
-
-  return { reports, loading, refetch: fetchReports };
 }

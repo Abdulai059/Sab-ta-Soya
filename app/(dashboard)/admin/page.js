@@ -54,7 +54,7 @@ export default function AdminPanel() {
      UI
   ------------------------------*/
   return (
-    <div className="space-y-6 pt-15">
+    <div className="space-y-6">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

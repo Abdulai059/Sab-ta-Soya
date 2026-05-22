@@ -1,63 +1,73 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import toast from "react-hot-toast";
 import { useHasPermission } from "@/hooks/usePermissions";
 import { USERS } from "@/lib/permissions";
+import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
+import toast from "react-hot-toast";
 
-export function useUserManagement() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+async function fetchUsers() {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, created_at, organization, phone")
+    .order("created_at", { ascending: false });
 
-  const canViewUsers = useHasPermission(USERS.VIEW_ALL);
-  const canChangeRoles = useHasPermission(USERS.CHANGE_ROLES);
-
-  useEffect(() => {
-    if (canViewUsers) fetchUsers();
-  }, [canViewUsers]);
-
-  async function fetchUsers() {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, role, created_at, organization, phone")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      toast.error("Error fetching users");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+  if (error) {
+    toast.error("Error fetching users");
+    throw error;
   }
 
-  async function handleRoleChange(userId, newRole) {
-    if (!canChangeRoles) {
-      toast.error("You don't have permission to change roles");
-      return;
-    }
+  return data || [];
+}
 
-    try {
+export function useUserManagement() {
+  const qc = useQueryClient();
+  const canViewUsers   = useHasPermission(USERS.VIEW_ALL);
+  const canChangeRoles = useHasPermission(USERS.CHANGE_ROLES);
+
+  const { data: users = [], isLoading: loading } = useQuery({
+    queryKey: QUERY_KEYS.profiles,
+    queryFn: fetchUsers,
+    enabled: canViewUsers,
+  });
+
+  const { mutate: handleRoleChange } = useMutation({
+    mutationFn: async ({ userId, newRole }) => {
+      if (!canChangeRoles) throw new Error("You don't have permission to change roles");
+
       const { error } = await supabase
         .from("profiles")
         .update({ role: newRole })
         .eq("id", userId);
 
       if (error) throw error;
+      return { userId, newRole };
+    },
 
-      toast.success("Role updated");
-      setUsers((prev) =>
-        prev.map((user) => (user.id === userId ? { ...user, role: newRole } : user)),
+    // Optimistic update — role flips instantly in the table
+    onMutate: async ({ userId, newRole }) => {
+      await qc.cancelQueries({ queryKey: QUERY_KEYS.profiles });
+      const snapshot = qc.getQueryData(QUERY_KEYS.profiles);
+      qc.setQueryData(QUERY_KEYS.profiles, (old = []) =>
+        old.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
       );
-    } catch (error) {
-      toast.error("Error updating role");
-      console.error(error);
-    }
-  }
+      return { snapshot };
+    },
 
-  return { users, loading, canViewUsers, canChangeRoles, handleRoleChange };
+    onSuccess: () => toast.success("Role updated"),
+
+    onError: (err, _vars, ctx) => {
+      toast.error(err.message || "Error updating role");
+      if (ctx?.snapshot) qc.setQueryData(QUERY_KEYS.profiles, ctx.snapshot);
+    },
+  });
+
+  return {
+    users,
+    loading,
+    canViewUsers,
+    canChangeRoles,
+    handleRoleChange: (userId, newRole) => handleRoleChange({ userId, newRole }),
+  };
 }

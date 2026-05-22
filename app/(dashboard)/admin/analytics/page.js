@@ -29,7 +29,7 @@ export default function AuthorityDashboard() {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="space-y-5 max-w-[1400px] pt-15 mx-auto">
+    <div className="space-y-5 max-w-[1400px] mx-auto">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>

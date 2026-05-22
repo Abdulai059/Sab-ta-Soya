@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import {
   Droplets,
   LayoutDashboard,
@@ -40,9 +39,8 @@ const ROLE_COLORS = {
 //   { id: "settings", label: "Settings", icon: Settings, href: null },
 // ];
 
-export default function DashboardNavbar({ activeNav, onNavChange }) {
+export default function DashboardNavbar() {
   const { profile, signOut } = useAuth();
-  const pathname = usePathname();
   const isAuthenticated = !!profile;
 
   const [profileOpen, setProfileOpen] = useState(false);
