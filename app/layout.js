@@ -3,6 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import LayoutWrapper from "@/components/ui/LayoutWrapper";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { RealtimeProvider } from "@/components/providers/RealtimeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,22 +51,22 @@ export default function RootLayout({ children }) {
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              style: {
-                zIndex: 99999,
-              },
-              className: '',
-              duration: 4000,
-            }}
-            containerStyle={{
-              zIndex: 99999,
-            }}
-          />
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
+          <QueryProvider>
+            <RealtimeProvider>
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  style: { zIndex: 99999 },
+                  className: '',
+                  duration: 4000,
+                }}
+                containerStyle={{ zIndex: 99999 }}
+              />
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </RealtimeProvider>
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

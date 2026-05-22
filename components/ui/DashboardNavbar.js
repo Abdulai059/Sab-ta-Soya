@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import {
   Droplets,
   LayoutDashboard,
@@ -33,16 +32,15 @@ const ROLE_COLORS = {
   supervisor: "bg-cyan-100 text-cyan-700",
 };
 
-const DASHBOARD_NAV_ITEMS = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: null },
-  { id: "reports", label: "Reports", icon: FileText, href: null },
-  { id: "map", label: "Map", icon: MapIcon, href: null },
-  { id: "settings", label: "Settings", icon: Settings, href: null },
-];
+// const DASHBOARD_NAV_ITEMS = [
+//   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: null },
+//   { id: "reports", label: "Reports", icon: FileText, href: null },
+//   { id: "map", label: "Map", icon: MapIcon, href: null },
+//   { id: "settings", label: "Settings", icon: Settings, href: null },
+// ];
 
-export default function DashboardNavbar({ activeNav, onNavChange }) {
+export default function DashboardNavbar() {
   const { profile, signOut } = useAuth();
-  const pathname = usePathname();
   const isAuthenticated = !!profile;
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -68,7 +66,7 @@ export default function DashboardNavbar({ activeNav, onNavChange }) {
   return (
     <>
       <header className="fixed top-0 inset-x-0 z-50 border-b border-stone-200/70 bg-white backdrop-blur-xl">
-        <div className="h-16  mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
+        <div className="h-16 w-[90%] mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-5 min-w-0">
             <Link
               href={dashboardHome}
@@ -89,7 +87,7 @@ export default function DashboardNavbar({ activeNav, onNavChange }) {
 
             <div className="hidden lg:block w-px h-7 bg-stone-200" />
 
-            <nav className="hidden md:flex gap-2 items-center gap-1">
+            {/* <nav className="hidden md:flex gap-2 items-center gap-1">
               {DASHBOARD_NAV_ITEMS.map(({ id, label, icon: Icon }) => {
                 const active = activeNav === id;
 
@@ -117,7 +115,7 @@ export default function DashboardNavbar({ activeNav, onNavChange }) {
                   </button>
                 );
               })}
-            </nav>
+            </nav> */}
           </div>
 
           <div className="flex items-center gap-2">
@@ -204,7 +202,7 @@ export default function DashboardNavbar({ activeNav, onNavChange }) {
 
         {mobileOpen && (
           <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 flex flex-col gap-1">
-            {DASHBOARD_NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+            {/* {DASHBOARD_NAV_ITEMS.map(({ id, label, icon: Icon }) => {
               const active = activeNav === id;
               const commonClass = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
@@ -227,7 +225,7 @@ export default function DashboardNavbar({ activeNav, onNavChange }) {
                   {content}
                 </button>
               );
-            })}
+            })} */}
 
             <div className="border-t border-stone-100 mt-2 pt-2">
               {isAuthenticated && (

@@ -1,197 +1,330 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboardView } from "@/context/DashboardViewContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useMyOfferCount } from "@/hooks/useMyOfferCount";
+
 import {
-  ShieldCheck, Wrench, Landmark, Handshake,
-  ClipboardList, Map, FileEdit, Settings,
-  LogOut, ChevronRight, X,
+  DASHBOARD,
+  REPORTS,
+  MAP,
+  SETTINGS,
+  ROLES,
+  ROLE_METADATA,
+} from "@/lib/permissions";
+
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Map as MapIcon,
+  FileEdit,
+  Settings,
+  LogOut,
+  Shield,
+  Landmark,
+  Handshake,
+  Users,
+  UserCheck,
+  ClipboardCheck,
+  Bell,
+  X,
 } from "lucide-react";
 
-const NAV_BY_ROLE = {
-  admin: [
-    { label: "Admin Panel",      href: "/admin",            icon: ShieldCheck,   type: "link" },
-    { label: "District Officer", href: "/district-officer", icon: Landmark,      type: "link" },
-    { label: "NGO",              href: "/ngo",              icon: Handshake,     type: "link" },
-    { type: "divider" },
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-    { type: "divider" },
-    { label: "Settings",         href: "/settings",         icon: Settings,      type: "link" },
-  ],
-  district_officer: [
-    { label: "District View",    href: "/district-officer", icon: Landmark,      type: "link" },
-    { type: "divider" },
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  community_officer: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  health_officer: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  ngo: [
-    { label: "NGO Portal",       href: "/ngo",              icon: Handshake,     type: "link" },
-    { type: "divider" },
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  response_team: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  headteacher: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  community_agent: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  sanitation_worker: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  field_worker: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-  supervisor: [
-    { label: "Reports",          view: "reports",           icon: ClipboardList, type: "view" },
-    { label: "Live Map",         view: "map",               icon: Map,           type: "view" },
-    { label: "Submit Issue",     view: "submit",            icon: FileEdit,      type: "view" },
-  ],
-};
+const NAV_GROUPS = [
+  {
+    title: "Overview",
+    items: [
+      {
+        id: "analytics",
+        label: "Analytics",
+        href: "/admin/analytics",
+        icon: LayoutDashboard,
+        permission: DASHBOARD.VIEW_ADMIN_PANEL,
+      },
+    ],
+  },
 
-const ROLE_META = {
-  admin:             { label: "Administrator",    color: "bg-violet-100 text-violet-700" },
-  district_officer:  { label: "District Officer", color: "bg-sky-100 text-sky-700" },
-  community_officer: { label: "Community Officer",color: "bg-emerald-100 text-emerald-700" },
-  health_officer:    { label: "Health Officer",   color: "bg-pink-100 text-pink-700" },
-  ngo:               { label: "NGO Partner",      color: "bg-amber-100 text-amber-700" },
-  response_team:     { label: "Response Team",    color: "bg-red-100 text-red-700" },
-  headteacher:       { label: "Head Teacher",     color: "bg-indigo-100 text-indigo-700" },
-  community_agent:   { label: "Community Agent",  color: "bg-teal-100 text-teal-700" },
-  sanitation_worker: { label: "Sanitation Worker",color: "bg-lime-100 text-lime-700" },
-  field_worker:      { label: "Field Worker",     color: "bg-orange-100 text-orange-700" },
-  supervisor:        { label: "Supervisor",       color: "bg-cyan-100 text-cyan-700" },
-};
+  {
+    title: "Operations",
+    items: [
+      {
+        id: "reports",
+        label: "Reports",
+        view: "reports",
+        icon: ClipboardList,
+        permission: REPORTS.VIEW_ALL,
+        type: "view",
+      },
+      {
+        id: "assign-workers",
+        label: "Assign Workers",
+        view: "assignWorker",
+        icon: UserCheck,
+        permission: REPORTS.ASSIGN,
+        type: "view",
+      },
+      {
+        id: "worker-offers",
+        label: "Worker Offers",
+        view: "workerOffers",
+        icon: ClipboardCheck,
+        permission: REPORTS.ASSIGN,
+        type: "view",
+      },
+      {
+        id: "my-offers",
+        label: "My Offers",
+        view: "myOffers",
+        icon: Bell,
+        permission: REPORTS.VIEW_ASSIGNED,
+        excludePermission: REPORTS.ASSIGN,
+        type: "view",
+      },
+      {
+        id: "live-map",
+        label: "Live Map",
+        view: "map",
+        icon: MapIcon,
+        permission: MAP.VIEW,
+        type: "view",
+      },
+      {
+        id: "submit-issue",
+        label: "Submit Issue",
+        view: "submit",
+        icon: FileEdit,
+        permission: REPORTS.CREATE,
+        type: "view",
+      },
+    ],
+  },
+
+  {
+    title: "Administration",
+    items: [
+      {
+        id: "users",
+        label: "Users",
+        href: "/admin",
+        icon: Users,
+        permission: DASHBOARD.VIEW_ADMIN_PANEL,
+      },
+      {
+        id: "district",
+        label: "District Panel",
+        href: "/district-officer",
+        icon: Landmark,
+        permission: DASHBOARD.VIEW_DISTRICT_PANEL,
+      },
+      {
+        id: "ngo",
+        label: "NGO Portal",
+        href: "/ngo",
+        icon: Handshake,
+        permission: DASHBOARD.VIEW_NGO_PORTAL,
+      },
+      {
+        id: "operator",
+        label: "Operator",
+        href: "/operator",
+        icon: Shield,
+        permission: DASHBOARD.VIEW_OPERATOR_PANEL,
+      },
+    ],
+  },
+
+  {
+    title: "System",
+    items: [
+      {
+        id: "settings",
+        label: "Settings",
+        href: "/settings",
+        icon: Settings,
+        permission: SETTINGS.VIEW,
+      },
+    ],
+  },
+];
 
 export default function DashboardSidebar({ open, onClose }) {
   const { profile, signOut } = useAuth();
-  const pathname = usePathname();
-  const { activeView, setView, clearView } = useDashboardView();
+  const { setView, clearView } = useDashboardView();
 
-  const role     = profile?.role ?? "community_officer";
-  const navItems = NAV_BY_ROLE[role] ?? NAV_BY_ROLE.community_officer;
-  const roleMeta = ROLE_META[role] ?? { label: role, color: "bg-gray-100 text-gray-700" };
-  const name     = profile?.full_name || profile?.email?.split("@")[0] || "User";
+  const userPermissions = usePermissions();
+  const pendingOfferCount = useMyOfferCount();
+
+  const [activeItem, setActiveItem] = useState("reports");
+
+  const hasPermission = (permission) =>
+    userPermissions.includes(permission);
+
+  const role = profile?.role ?? ROLES.COMMUNITY_OFFICER;
+
+  const roleMeta = ROLE_METADATA[role] ?? {
+    label: role,
+    color: "bg-gray-100 text-gray-700",
+  };
+
+  const name =
+    profile?.full_name ||
+    profile?.email?.split("@")[0] ||
+    "User";
+
+  const filteredGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) =>
+        (!item.permission || hasPermission(item.permission)) &&
+        (!item.excludePermission ||
+          !hasPermission(item.excludePermission))
+    ),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <aside
       className={`
-        fixed left-0 top-16 bottom-0 w-56 bg-white border-r border-gray-200
-        flex flex-col z-40 overflow-y-auto transition-transform duration-200
-        ${open ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0
+        fixed left-0 top-16 bottom-0
+        w-64 bg-white border-r border-gray-100
+        flex flex-col z-40 overflow-y-auto
+        transition-transform duration-300 ease-in-out
+        ${open ? "translate-x-0 shadow-xl" : "-translate-x-full"}
+        lg:translate-x-0 lg:shadow-none
       `}
     >
-      {/* Mobile close button */}
-      <div className="lg:hidden flex justify-end px-3 pt-3">
+      {/* MOBILE CLOSE */}
+      <div className="lg:hidden flex justify-end p-3">
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          aria-label="Close menu"
+          className="p-2 rounded-xl hover:bg-gray-100 transition"
         >
           <X className="w-4 h-4 text-gray-500" />
         </button>
       </div>
 
-      {/* User info */}
-      <div className="px-4 py-3 border-b border-gray-100">
+      {/* USER */}
+      <div className="px-4 py-5 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0">
-            <span className="text-white text-sm font-bold uppercase">
-              {name.charAt(0)}
-            </span>
+          <div className="w-11 h-11 rounded-2xl bg-emerald-500 flex items-center justify-center text-white font-bold shadow-sm">
+            {name.charAt(0)}
           </div>
+
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
-            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${roleMeta.color}`}>
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {name}
+            </p>
+
+            <span
+              className={`inline-flex mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${roleMeta.color}`}
+            >
               {roleMeta.label}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Nav items */}
-      <nav className="flex-1 px-3 py-3 space-y-0.5">
-        {navItems.map((item, i) => {
-          if (item.type === "divider") {
-            return <div key={`div-${i}`} className="my-2 border-t border-gray-100" />;
-          }
+      {/* NAV */}
+      <nav className="flex-1 px-3 py-4 space-y-6">
+        {filteredGroups.map((group) => (
+          <div key={group.title}>
+            <p className="px-3 mb-2 text-[11px] uppercase tracking-wider text-gray-400 font-semibold">
+              {group.title}
+            </p>
 
-          const Icon = item.icon;
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const Icon = item.icon;
 
-          if (item.type === "view") {
-            const isActive = activeView === item.view;
-            return (
-              <button
-                key={item.view}
-                onClick={() => setView(item.view)}
-                className={`group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-              >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`} />
-                <span className="flex-1 text-left truncate">{item.label}</span>
-                {isActive && <ChevronRight className="w-3.5 h-3.5 text-emerald-500" />}
-              </button>
-            );
-          }
+                const isActive = activeItem === item.id;
 
-          const isActive = !activeView && (pathname === item.href || pathname?.startsWith(item.href + "/"));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={clearView}
-              className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              }`}
-            >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`} />
-              <span className="flex-1 truncate">{item.label}</span>
-              {isActive && <ChevronRight className="w-3.5 h-3.5 text-emerald-500" />}
-            </Link>
-          );
-        })}
+                const baseClass = `
+                  group flex items-center gap-3
+                  px-3 py-2.5 rounded-xl text-sm
+                  transition-all duration-200
+                `;
+
+                const activeClass = isActive
+                  ? "bg-emerald-50 text-emerald-700 shadow-sm"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900";
+
+                // VIEW ITEMS
+                if (item.type === "view") {
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveItem(item.id);
+                        setView(item.view);
+                      }}
+                      className={`${baseClass} ${activeClass} w-full`}
+                    >
+                      <Icon
+                        className={`w-4 h-4 shrink-0 transition-colors ${
+                          isActive
+                            ? "text-emerald-600"
+                            : "text-gray-400 group-hover:text-gray-600"
+                        }`}
+                      />
+
+                      <span className="flex-1 text-left truncate font-medium">
+                        {item.label}
+                      </span>
+
+                      {item.view === "myOffers" &&
+                        pendingOfferCount > 0 && (
+                          <span className="min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-[10px] font-bold">
+                            {pendingOfferCount}
+                          </span>
+                        )}
+                    </button>
+                  );
+                }
+
+                // LINK ITEMS
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={() => {
+                      setActiveItem(item.id);
+                      clearView();
+                    }}
+                    className={`${baseClass} ${activeClass}`}
+                  >
+                    <Icon
+                      className={`w-4 h-4 shrink-0 transition-colors ${
+                        isActive
+                          ? "text-emerald-600"
+                          : "text-gray-400 group-hover:text-gray-600"
+                      }`}
+                    />
+
+                    <span className="flex-1 truncate font-medium">
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Sign out */}
-      <div className="px-3 py-3 border-t border-gray-100">
+      {/* FOOTER */}
+      <div className="border-t border-gray-100 p-3">
         <button
           onClick={signOut}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors"
+          className="
+            flex items-center gap-3 w-full
+            px-3 py-2.5 rounded-xl
+            text-sm font-medium text-red-500
+            hover:bg-red-50 transition-all
+          "
         >
-          <LogOut className="w-4 h-4 shrink-0" />
+          <LogOut className="w-4 h-4" />
           Sign out
         </button>
       </div>
