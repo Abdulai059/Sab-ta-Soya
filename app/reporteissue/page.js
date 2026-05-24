@@ -547,23 +547,94 @@ export default function ReportForm() {
         if (climateData) climateEventId = climateData.id;
       }
 
-      const { error } = await supabase.from("sanitation_reports").insert({
-        reference_id: generateReferenceId(),
-        issue_type: form.issueType,
-        severity: form.severity,
-        description: form.description || null,
-        health_risk: form.healthRisk,
-        reporter_phone: form.phone,
-        affected_people_count: form.affectedCount ? parseInt(form.affectedCount) : null,
-        is_anonymous: form.isAnonymous,
-        status: "pending",
-        community_id: communityId,
-        location_id: locationId,
-        climate_event_id: climateEventId,
-        reported_by: profile?.id || null,
-      });
+      const { data: insertedReport, error } = await supabase
+        .from("sanitation_reports")
+        .insert({
+          reference_id: generateReferenceId(),
+          issue_type: form.issueType,
+          severity: form.severity,
+          description: form.description || null,
+          health_risk: form.healthRisk,
+          reporter_phone: form.phone,
+          affected_people_count: form.affectedCount ? parseInt(form.affectedCount) : null,
+          is_anonymous: form.isAnonymous,
+          status: "pending",
+          community_id: communityId,
+          location_id: locationId,
+          climate_event_id: climateEventId,
+          reported_by: profile?.id || null,
+        })
+        .select("id")
+        .single();
 
       if (error) throw error;
+
+      // ── Auto-generate risk assessment ────────────────────────────────────
+      if (insertedReport?.id) {
+        // Determine location risk factors from community data
+        let nearSchool = false;
+        let nearWaterSource = false;
+        let floodZone = false;
+        let droughtZone = false;
+
+        if (communityId) {
+          const { data: communityInfo } = await supabase
+            .from("communities")
+            .select("flood_risk_level, drought_risk_level")
+            .eq("id", communityId)
+            .single();
+          if (communityInfo) {
+            floodZone   = communityInfo.flood_risk_level   === "high";
+            droughtZone = communityInfo.drought_risk_level === "high";
+          }
+        }
+
+        // Check if same location had a report in the last 30 days
+        let repeatedIncident = false;
+        if (locationId) {
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          const { count } = await supabase
+            .from("sanitation_reports")
+            .select("id", { count: "exact", head: true })
+            .eq("location_id", locationId)
+            .gte("created_at", thirtyDaysAgo.toISOString())
+            .neq("id", insertedReport.id);
+          repeatedIncident = (count ?? 0) > 0;
+        }
+
+        // Compute risk score
+        const affectedChildren = form.affectedCount ? parseInt(form.affectedCount) : 0;
+        const flagScore =
+          (nearSchool      ? 15 : 0) +
+          (nearWaterSource ? 15 : 0) +
+          (floodZone       ? 10 : 0) +
+          (droughtZone     ? 10 : 0) +
+          (repeatedIncident ? 10 : 0);
+        const childrenScore = Math.min(affectedChildren * 2, 20);
+        const riskScore = flagScore + childrenScore;
+
+        const escalationRequired = form.severity === "critical" || riskScore >= 50;
+
+        const priorityLevel =
+          riskScore >= 50 ? "critical" :
+          riskScore >= 30 ? "high" :
+          riskScore >= 15 ? "medium" : "low";
+
+        await supabase.from("risk_assessments").insert({
+          report_id:              insertedReport.id,
+          risk_score:             riskScore,
+          priority_level:         priorityLevel,
+          near_school:            nearSchool,
+          near_water_source:      nearWaterSource,
+          flood_zone:             floodZone,
+          drought_zone:           droughtZone,
+          repeated_incident:      repeatedIncident,
+          affected_children_count: affectedChildren,
+          escalation_required:    escalationRequired,
+          calculated_by:          profile?.id || null,
+        });
+      }
 
       toast.success("Report submitted successfully");
       handleSuccess();

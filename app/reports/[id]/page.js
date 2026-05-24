@@ -50,7 +50,7 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:pt-30 pt-0">
+    <div className="min-h-screen bg-gray-50  pt-0">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={handleBack}
@@ -67,7 +67,7 @@ export default function ReportDetailPage() {
               <ReportInfo report={report} />
             </div>
 
-            <WorkflowRoadmap report={report} />
+            <WorkflowRoadmap report={report} statusHistory={statusHistory} />
           </div>
 
           <div className="space-y-6">

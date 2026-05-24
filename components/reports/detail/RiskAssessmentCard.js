@@ -197,7 +197,7 @@ export default function RiskAssessmentCard({ risk }) {
 
         {/* Calculated at */}
         <p className="text-[11px] text-gray-400 text-right">
-          Assessed {new Date(risk.calculated_at).toLocaleString()}
+          Assessed {new Date(risk.created_at).toLocaleString()}
         </p>
       </div>
     </div>
