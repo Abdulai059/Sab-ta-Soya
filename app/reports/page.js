@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { Clock, CheckCircle, AlertTriangle, Cloud, List } from "lucide-react";
+import { Clock, CheckCircle, AlertTriangle, List } from "lucide-react";
 import { useReports } from "@/hooks/useReports";
 import { useReportFilters } from "@/hooks/useReportFilters";
 import { usePagination } from "@/hooks/usePagination";
@@ -38,11 +38,10 @@ export default function ReportsPage() {
   const stats = calculateReportStats(reports);
 
   const filters = [
-    { id: "all", label: "All", icon: List },
-    { id: "pending", label: "Pending", icon: Clock },
-    { id: "resolved", label: "Completed", icon: CheckCircle },
-    { id: "critical", label: "Critical", icon: AlertTriangle },
-    { id: "climate", label: "Climate-linked", icon: Cloud },
+    { id: "all",      label: "All",             icon: List },
+    { id: "pending",  label: "Pending",          icon: Clock },
+    { id: "resolved", label: "Verified/Disposed", icon: CheckCircle },
+    { id: "critical", label: "Critical",          icon: AlertTriangle },
   ];
 
   if (loading) return <ReportsSkeleton />;
@@ -60,15 +59,11 @@ export default function ReportsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <StatsCard value={stats.total} label="Total reports" color="gray" />
-          <StatsCard value={stats.pending} label="Pending" color="yellow" />
-          <StatsCard value={stats.assigned} label="Assigned" color="blue" />
-          <StatsCard value={stats.resolved} label="Completed" color="emerald" />
-          <StatsCard
-            value={stats.critical}
-            label="Critical / health risk"
-            color="red"
-          />
+          <StatsCard value={stats.total}      label="Total reports"       color="gray" />
+          <StatsCard value={stats.pending}    label="Pending"             color="yellow" />
+          <StatsCard value={stats.assigned}   label="Assigned"            color="blue" />
+          <StatsCard value={stats.inProgress} label="In Progress"         color="purple" />
+          <StatsCard value={stats.verified}   label="Verified"            color="emerald" />
         </div>
 
         <div className="flex flex-wrap gap-3 mb-6 mt-4 bg-white">

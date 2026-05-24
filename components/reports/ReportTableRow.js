@@ -1,7 +1,36 @@
-import { Eye, Lock, MapPin } from "lucide-react";
+import { Eye, Lock, MapPin, User, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { navigateTo } from "@/utils/navigateTo";
 import { useDashboardView } from "@/context/DashboardViewContext";
+
+function RiskScoreBadge({ risk }) {
+  if (!risk) {
+    return <span className="text-xs text-gray-300">—</span>;
+  }
+
+  const { risk_score, priority_level, escalation_required } = risk;
+
+  const colors = {
+    critical: "bg-red-100 text-red-700 border-red-200",
+    high:     "bg-orange-100 text-orange-700 border-orange-200",
+    medium:   "bg-yellow-100 text-yellow-700 border-yellow-200",
+    low:      "bg-blue-100 text-blue-700 border-blue-200",
+  };
+
+  const cls = colors[priority_level] ?? "bg-gray-100 text-gray-600 border-gray-200";
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border ${cls}`}>
+        <ShieldAlert className="w-3 h-3" />
+        {risk_score}
+      </span>
+      {escalation_required && (
+        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="Escalation required" />
+      )}
+    </div>
+  );
+}
 
 export default function ReportTableRow({ report, profile, formatTimeAgo }) {
   const router = useRouter();
@@ -28,11 +57,13 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case "pending":   return "bg-yellow-50 text-yellow-700 border-yellow-200";
-      case "assigned":  return "bg-blue-50 text-blue-700 border-blue-200";
-      case "completed": return "bg-emerald-50 text-emerald-700 border-emerald-200";
-      case "cancelled": return "bg-red-50 text-red-700 border-red-200";
-      default:          return "bg-gray-50 text-gray-600 border-gray-200";
+      case "pending":     return "bg-yellow-50 text-yellow-700 border-yellow-200";
+      case "assigned":    return "bg-blue-50 text-blue-700 border-blue-200";
+      case "in_progress": return "bg-purple-50 text-purple-700 border-purple-200";
+      case "disposed":    return "bg-orange-50 text-orange-700 border-orange-200";
+      case "verified":    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      case "cancelled":   return "bg-red-50 text-red-700 border-red-200";
+      default:            return "bg-gray-50 text-gray-600 border-gray-200";
     }
   };
 
@@ -66,9 +97,39 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
       </td>
 
       <td className={`${cell} whitespace-nowrap`}>
+        <RiskScoreBadge risk={report.risk} />
+      </td>
+
+      <td className={`${cell} whitespace-nowrap`}>
         <span className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-medium border ${getStatusColor(report.status)}`}>
-          {report.status}
+          {report.status?.replace(/_/g, " ")}
         </span>
+      </td>
+
+      <td className={cell}>
+        {report.worker ? (
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0">
+              {report.worker.full_name?.charAt(0).toUpperCase() || "?"}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-gray-800 truncate">{report.worker.full_name}</p>
+              <p className={`text-[10px] font-medium ${
+                report.status === "in_progress" ? "text-blue-600"
+                : report.status === "disposed"  ? "text-orange-600"
+                : report.status === "verified"  ? "text-emerald-600"
+                : "text-yellow-600"
+              }`}>
+                {report.status?.replace(/_/g, " ")}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-gray-400">
+            <User className="w-3.5 h-3.5" />
+            <span className="text-xs">Unassigned</span>
+          </div>
+        )}
       </td>
 
       <td className={`${cell} whitespace-nowrap text-xs text-gray-400`}>

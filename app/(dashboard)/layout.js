@@ -5,10 +5,10 @@ import DashboardShell from "@/components/ui/DashboardShell";
 
 export default function DashboardLayout({ children }) {
   return (
-    <ProtectedRoute>
-      <DashboardShell>
+    <DashboardShell>
+      <ProtectedRoute>
         {children}
-      </DashboardShell>
-    </ProtectedRoute>
+      </ProtectedRoute>
+    </DashboardShell>
   );
 }

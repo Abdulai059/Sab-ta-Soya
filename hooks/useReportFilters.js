@@ -1,44 +1,38 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
+
+// New workflow: pending → assigned → in_progress → disposed → verified
+const DONE_STATUSES = ["disposed", "verified"];
 
 export function useReportFilters(reports) {
-  const [filteredReports, setFilteredReports] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const filterReports = useCallback(() => {
-    let filtered = [...reports];
+  const filteredReports = useMemo(() => {
+    let filtered = reports ?? [];
 
     if (activeFilter === "pending") {
-      filtered = filtered.filter(
-        (r) => r.status === "pending" || r.status === "assigned",
-      );
+      filtered = filtered.filter((r) => r.status === "pending" || r.status === "assigned");
     } else if (activeFilter === "resolved") {
-      filtered = filtered.filter((r) => r.status === "completed");
+      filtered = filtered.filter((r) => DONE_STATUSES.includes(r.status));
     } else if (activeFilter === "critical") {
-      filtered = filtered.filter(
-        (r) => r.severity === "critical" || r.health_risk,
-      );
+      filtered = filtered.filter((r) => r.severity === "critical" || r.health_risk);
     } else if (activeFilter === "climate") {
       filtered = filtered.filter((r) => r.climate_event_id);
     }
 
-    if (searchQuery) {
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (r) =>
-          r.reference_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.issue_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.location?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          r.community?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+          r.reference_id?.toLowerCase().includes(q) ||
+          r.issue_type?.toLowerCase().includes(q) ||
+          r.location?.name?.toLowerCase().includes(q) ||
+          r.community?.name?.toLowerCase().includes(q),
       );
     }
 
-    setFilteredReports(filtered);
+    return filtered;
   }, [reports, activeFilter, searchQuery]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    filterReports();
-  }, [filterReports]);
 
   return {
     filteredReports,

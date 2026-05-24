@@ -16,14 +16,7 @@ export function useGpsTracking({ profile, setRightPanel, setActiveLayers }) {
       userName: profile.full_name || "Unknown User",
       userRole: profile.role || "operator",
       onUpdate: (position) => {
-        console.log(
-          "📍 GPS Position:",
-          position.latitude,
-          position.longitude,
-          "Accuracy:",
-          position.accuracy,
-          "m"
-        );
+        // GPS position updated successfully
       },
       onError: (err) => {
         console.error("GPS Error:", err);

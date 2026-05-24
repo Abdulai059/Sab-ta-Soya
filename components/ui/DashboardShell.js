@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import DashboardSidebar from "./DashboardSidebar";
 import DashboardNavbar from "./DashboardNavbar";
 import dynamic from "next/dynamic";
 import { DashboardViewContext } from "@/context/DashboardViewContext";
+import { useAuth } from "@/context/AuthContext";
+import { ROLE_PERMISSIONS, DASHBOARD } from "@/lib/permissions";
 import { Menu } from "lucide-react";
+import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
 
 const Loader = ({ label }) => (
   <div className="flex items-center justify-center h-64 text-gray-400 text-sm gap-2">
@@ -14,6 +17,10 @@ const Loader = ({ label }) => (
   </div>
 );
 
+const AnalyticsPage = dynamic(() => import("@/app/(dashboard)/admin/analytics/page"), {
+  ssr: false,
+  loading: () => <Loader label="analytics" />,
+});
 const MapPage = dynamic(() => import("@/app/maps/page"), {
   ssr: false,
   loading: () => <Loader label="map" />,
@@ -30,44 +37,76 @@ const ReportDetail = dynamic(() => import("@/app/reports/[id]/page"), {
   ssr: false,
   loading: () => <Loader label="report" />,
 });
-const AssignWorkerPage = dynamic(() => import("@/components/admin/AssignWorkerPage"), {
+
+const UserManagementPage = dynamic(() => import("@/app/(dashboard)/admin/page"), {
   ssr: false,
-  loading: () => <Loader label="assignments" />,
+  loading: () => <Loader label="users" />,
 });
-const WorkerOffersPage = dynamic(() => import("@/components/admin/WorkerOffersPage"), {
+const DistrictPage = dynamic(() => import("@/app/(dashboard)/district-officer/page"), {
   ssr: false,
-  loading: () => <Loader label="offers" />,
+  loading: () => <Loader label="district" />,
 });
-const MyOffersPage = dynamic(() => import("@/components/worker/MyOffersPage"), {
+const NgoPage = dynamic(() => import("@/app/(dashboard)/ngo/page"), {
   ssr: false,
-  loading: () => <Loader label="my offers" />,
+  loading: () => <Loader label="NGO portal" />,
+});
+const OperatorPage = dynamic(() => import("@/app/(dashboard)/operator/page"), {
+  ssr: false,
+  loading: () => <Loader label="operator" />,
 });
 
 const VIEW_COMPONENTS = {
+  analytics: AnalyticsPage,
   map: MapPage,
   reports: ReportsPage,
   submit: SubmitPage,
   reportDetail: ReportDetail,
-  assignWorker: AssignWorkerPage,
-  workerOffers: WorkerOffersPage,
-  myOffers: MyOffersPage,
+  users: UserManagementPage,
+  district: DistrictPage,
+  ngo: NgoPage,
+  operator: OperatorPage,
 };
 
 const VIEW_LABELS = {
+  analytics: "Analytics",
   map: "Live Map",
   reports: "Reports",
   submit: "Submit Issue",
   reportDetail: "Report Detail",
-  assignWorker: "Assign Workers",
-  workerOffers: "Worker Offers",
-  myOffers: "My Offers",
+  users: "User Management",
+  district: "District Panel",
+  ngo: "NGO Portal",
+  operator: "Operator",
 };
 
+/** Pick the best default view for a role */
+function getDefaultView(role) {
+  const perms = ROLE_PERMISSIONS[role] || [];
+  const isAdmin = perms.includes(DASHBOARD.VIEW_ADMIN_PANEL);
+  const isDistrict = perms.includes(DASHBOARD.VIEW_DISTRICT_PANEL) && !isAdmin;
+  const isNgo = perms.includes(DASHBOARD.VIEW_NGO_PORTAL) && !isAdmin;
+  const isOperator = perms.includes(DASHBOARD.VIEW_OPERATOR_PANEL) && !isAdmin;
+
+  if (isAdmin) return "analytics";
+  if (isDistrict) return "district";
+  if (isNgo) return "ngo";
+  if (isOperator) return "operator";
+  return "reports";
+}
+
 export default function DashboardShell({ children }) {
+  const { profile, loading: authLoading } = useAuth();
   const [activeView, setActiveView] = useState(null);
   const [viewParams, setViewParams] = useState({});
   const [history, setHistory] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Set the default view once the profile loads
+  useEffect(() => {
+    if (profile?.role && activeView === null) {
+      setActiveView(getDefaultView(profile.role));
+    }
+  }, [profile?.role, activeView]);
 
   const setView = useCallback(
     (view, params = {}) => {
@@ -88,17 +127,17 @@ export default function DashboardShell({ children }) {
       setActiveView(prev.view);
       setViewParams(prev.params);
     } else {
-      setActiveView(null);
+      setActiveView(getDefaultView(profile?.role));
       setViewParams({});
     }
-  }, [history]);
+  }, [history, profile?.role]);
 
   const clearView = useCallback(() => {
-    setActiveView(null);
+    setActiveView(getDefaultView(profile?.role));
     setViewParams({});
     setHistory([]);
     setSidebarOpen(false);
-  }, []);
+  }, [profile?.role]);
 
   const ActiveComponent = activeView ? VIEW_COMPONENTS[activeView] : null;
 
@@ -126,11 +165,11 @@ export default function DashboardShell({ children }) {
           onClose={() => setSidebarOpen(false)}
         />
 
-        {/* ── Scrollable main content ────────────────────────────────── */}
-        <main className="flex-1 lg:ml-64 overflow-y-auto bg-gray-50 min-h-0">
+        {/* ── Main content ───────────────────────────────────────────── */}
+        <main className="flex-1 lg:ml-64 min-h-0 flex flex-col bg-gray-50">
 
           {/* Mobile header bar with hamburger */}
-          <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-100 shadow-sm">
+          <div className="lg:hidden shrink-0 flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-100 shadow-sm z-20">
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -143,14 +182,25 @@ export default function DashboardShell({ children }) {
             </span>
           </div>
 
-          {/* Page content */}
-          <div className="p-4 sm:p-6 lg:p-8">
-            {ActiveComponent ? (
-              <ActiveComponent {...viewParams} />
-            ) : (
-              children
-            )}
-          </div>
+          {/* Map — fills all remaining space, no padding, no scroll */}
+          {activeView === "map" ? (
+            <div className="flex-1 h-0 overflow-hidden">
+              {ActiveComponent && <ActiveComponent {...viewParams} />}
+            </div>
+          ) : (
+            /* All other views — scrollable with padding */
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-4 sm:p-6 lg:p-8">
+                {authLoading || activeView === null ? (
+                  <DashboardSkeleton />
+                ) : ActiveComponent ? (
+                  <ActiveComponent {...viewParams} />
+                ) : (
+                  children
+                )}
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </DashboardViewContext.Provider>

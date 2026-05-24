@@ -18,11 +18,9 @@ export function RealtimeIndicator() {
 
     channel
       .on("system", { event: "connected" }, () => {
-        console.log("📡 Real-time connected");
         setIsConnected(true);
       })
       .on("system", { event: "disconnected" }, () => {
-        console.log("📡 Real-time disconnected");
         setIsConnected(false);
       })
       .subscribe((status) => {

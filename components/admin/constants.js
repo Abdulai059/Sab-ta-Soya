@@ -5,6 +5,13 @@ export const SEVERITY_COLORS = {
   low: "#1D9E75",
 };
 
+export const PRIORITY_COLORS = {
+  critical: "#E24B4A",
+  high:     "#EF9F27",
+  medium:   "#378ADD",
+  low:      "#1D9E75",
+};
+
 export const WORKER_COLORS = ["#1D9E75", "#378ADD", "#7F77DD", "#EF9F27", "#D4537E"];
 
 export const TYPE_COLORS = [
@@ -35,15 +42,23 @@ export const STATUS_CONFIG = [
   },
   {
     label: "In Progress",
-    keys: ["in progress", "in_progress"],
+    keys: ["in_progress"],
     color: "#8B5CF6",
     bg: "#F5F3FF",
     textColor: "#5B21B6",
     icon: "🔧",
   },
   {
-    label: "Resolved",
-    keys: ["resolved", "completed"],
+    label: "Disposed",
+    keys: ["disposed"],
+    color: "#F97316",
+    bg: "#FFF7ED",
+    textColor: "#9A3412",
+    icon: "🗑️",
+  },
+  {
+    label: "Verified",
+    keys: ["verified"],
     color: "#22C55E",
     bg: "#F0FDF4",
     textColor: "#15803D",
