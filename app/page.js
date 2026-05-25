@@ -2,11 +2,18 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Topbar from "@/components/ui/PublicNavbar";
 
-const MapsPage = dynamic(() => import("./maps/page"), { ssr: false });
+const MapsPage = dynamic(() => import("./maps/page"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center bg-stone-50 text-emerald-500 font-mono text-xs tracking-widest animate-pulse">
+      LOADING MAP...
+    </div>
+  ),
+});
 
 export default function HomePage() {
   const { user, profile, loading, mounted } = useAuth();
@@ -24,21 +31,17 @@ export default function HomePage() {
     }
   }, [user, profile, loading, mounted, router]);
 
-  // if (!mounted || loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-white">
-  //       <div className="w-10 h-10 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
-  //     </div>
-  //   );
-  // }
+
 
   if (user && profile) return null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f3f4f6]">
+    <div className="h-screen flex flex-col bg-[#f3f4f6] overflow-hidden">
       <Topbar />
-      <main className="flex-1 pt-14">
-        <MapsPage />
+      <main className="flex-1 min-h-0 pt-4">
+        <div className="h-full">
+          <MapsPage />
+        </div>
       </main>
     </div>
   );
