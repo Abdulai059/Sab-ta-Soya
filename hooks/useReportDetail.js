@@ -6,7 +6,6 @@ import { supabase } from "@/lib/supabase";
 import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
 
 async function fetchReportDetail(reportId) {
-  // Core report — no FK hints to avoid silent query failures
   const { data: reportData, error: reportError } = await supabase
     .from("sanitation_reports")
     .select(
@@ -22,7 +21,6 @@ async function fetchReportDetail(reportId) {
 
   if (reportError) throw reportError;
 
-  // Fetch worker and reporter profiles separately to avoid FK-hint failures
   const profileIds = [reportData.assigned_to, reportData.reported_by].filter(Boolean);
   let profileMap = {};
   if (profileIds.length > 0) {
@@ -35,11 +33,10 @@ async function fetchReportDetail(reportId) {
 
   const report = {
     ...reportData,
-    worker:               reportData.assigned_to ? (profileMap[reportData.assigned_to] ?? null) : null,
-    reported_by_profile:  reportData.reported_by  ? (profileMap[reportData.reported_by]  ?? null) : null,
+    worker:              reportData.assigned_to ? (profileMap[reportData.assigned_to] ?? null) : null,
+    reported_by_profile: reportData.reported_by  ? (profileMap[reportData.reported_by]  ?? null) : null,
   };
 
-  // Location images
   let locationImages = [];
   if (reportData?.location_id) {
     const { data: imagesData } = await supabase
@@ -50,30 +47,12 @@ async function fetchReportDetail(reportId) {
     locationImages = imagesData || [];
   }
 
-<<<<<<< HEAD
-  // Assignments — include service_tasks so we can show task progress
-  const { data: assignmentsData } = await supabase
-    .from("report_assignments")
-    .select(
-      `id, assigned_at, arrived_at, resolved_at, notes,
-       assigned_to_profile:profiles!assigned_to(full_name, phone, role),
-       assigned_by_profile:profiles!assigned_by(full_name, role),
-       service_tasks(id, status, task_type, created_at, started_at, completed_at)`
-    )
-    .eq("report_id", reportId)
-    .order("assigned_at", { ascending: false });
-
-  // Status history
-=======
-  // Status history — no FK hint on changed_by
->>>>>>> feature/update
   const { data: historyData } = await supabase
     .from("report_status_history")
     .select("id, old_status, new_status, changed_at, notes, changed_by")
     .eq("report_id", reportId)
     .order("changed_at", { ascending: false });
 
-  // Enrich history with changer profiles
   const changerIds = [...new Set((historyData || []).map((h) => h.changed_by).filter(Boolean))];
   let changerMap = {};
   if (changerIds.length > 0) {
@@ -83,12 +62,12 @@ async function fetchReportDetail(reportId) {
       .in("id", changerIds);
     changerMap = Object.fromEntries((changers || []).map((p) => [p.id, p]));
   }
+
   const statusHistory = (historyData || []).map((h) => ({
     ...h,
     changed_by_profile: h.changed_by ? (changerMap[h.changed_by] ?? null) : null,
   }));
 
-  // Risk assessment — uses created_at (schema has no calculated_at column)
   const { data: riskData, error: riskError } = await supabase
     .from("risk_assessments")
     .select(
@@ -101,7 +80,7 @@ async function fetchReportDetail(reportId) {
     .limit(1)
     .maybeSingle();
 
-  console.log("[RiskAssessment] reportId:", reportId, "| data:", riskData, "| error:", riskError?.message ?? null);
+  if (riskError) console.warn("[useReportDetail] risk error:", riskError.message);
 
   return {
     report,
@@ -113,7 +92,7 @@ async function fetchReportDetail(reportId) {
 }
 
 export function useReportDetail(reportId) {
-  const qc = useQueryClient();
+  const qc       = useQueryClient();
   const queryKey = QUERY_KEYS.reportDetail(reportId);
 
   const { data, isLoading: loading } = useQuery({
@@ -122,7 +101,6 @@ export function useReportDetail(reportId) {
     enabled: !!reportId,
   });
 
-  // Real-time: watch this specific report for status changes
   useEffect(() => {
     if (!reportId) return;
 
@@ -132,16 +110,15 @@ export function useReportDetail(reportId) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "sanitation_reports", filter: `id=eq.${reportId}` },
         (payload) => {
-          // Patch status immediately
           qc.setQueryData(queryKey, (old) => {
             if (!old) return old;
             return {
               ...old,
               report: {
                 ...old.report,
-                status:     payload.new.status,
+                status:      payload.new.status,
                 assigned_to: payload.new.assigned_to,
-                updated_at: payload.new.updated_at,
+                updated_at:  payload.new.updated_at,
               },
             };
           });
@@ -154,11 +131,11 @@ export function useReportDetail(reportId) {
   }, [reportId, qc, queryKey]);
 
   return {
-    report:          data?.report          ?? null,
-    assignments:     data?.assignments     ?? [],
-    statusHistory:   data?.statusHistory   ?? [],
-    locationImages:  data?.locationImages  ?? [],
-    riskAssessment:  data?.riskAssessment  ?? null,
+    report:        data?.report        ?? null,
+    assignments:   data?.assignments   ?? [],
+    statusHistory: data?.statusHistory ?? [],
+    locationImages: data?.locationImages ?? [],
+    riskAssessment: data?.riskAssessment ?? null,
     loading,
     refetch: () => qc.invalidateQueries({ queryKey }),
   };

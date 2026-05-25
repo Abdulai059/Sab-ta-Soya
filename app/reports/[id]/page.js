@@ -15,10 +15,10 @@ import ReportDetailSkeleton from "@/components/reports/detail/ReportDetailSkelet
 import RiskAssessmentCard from "@/components/reports/detail/RiskAssessmentCard";
 
 export default function ReportDetailPage() {
-  const { profile } = useAuth();
-  const router = useRouter();
-  const params = useParams();
-  const dashCtx = useDashboardView();
+  const { profile }   = useAuth();
+  const router        = useRouter();
+  const params        = useParams();
+  const dashCtx       = useDashboardView();
   const isInDashboard = !!dashCtx?.goBack;
 
   const reportId = isInDashboard ? dashCtx.viewParams?.id : params?.id;
@@ -27,26 +27,18 @@ export default function ReportDetailPage() {
     useReportDetail(reportId);
 
   const handleBack = () => {
-    if (isInDashboard) {
-      dashCtx.goBack();
-    } else {
-      router.push("/reports");
-    }
+    if (isInDashboard) dashCtx.goBack();
+    else router.push("/reports");
   };
 
   if (loading) return <ReportDetailSkeleton />;
 
   if (!report) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-<<<<<<< HEAD
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Report not found</h2>
-          <button onClick={handleBack} className="text-emerald-600 hover:text-emerald-700 text-sm">
-=======
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Report not found</h2>
           <button onClick={handleBack} className="text-emerald-600 hover:text-emerald-700">
->>>>>>> feature/update
             ← Back to reports
           </button>
         </div>
@@ -55,17 +47,7 @@ export default function ReportDetailPage() {
   }
 
   return (
-<<<<<<< HEAD
-    <div className="max-w-6xl mx-auto space-y-6">
-      <button
-        onClick={handleBack}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to reports
-      </button>
-=======
-    <div className="min-h-screen bg-gray-50  pt-0">
+    <div className="min-h-screen bg-gray-50 pt-0">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={handleBack}
@@ -74,7 +56,6 @@ export default function ReportDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           Back to reports
         </button>
->>>>>>> feature/update
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -97,6 +78,7 @@ export default function ReportDetailPage() {
             <QuickActions profile={profile} />
           </div>
         </div>
+      </div>
     </div>
   );
 }
