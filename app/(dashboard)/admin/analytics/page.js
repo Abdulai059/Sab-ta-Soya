@@ -90,7 +90,7 @@ export default function AuthorityDashboard() {
         />
       </div>
 
-      {/* Issue types + Status snapshot */}
+      {/* Issue types Status snapshot */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <IssueTypesChart issueTypes={issueTypes} />
         <StatusSnapshot statusSnap={statusSnap} />
