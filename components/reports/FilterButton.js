@@ -7,10 +7,10 @@ export default function FilterButton({
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors font-medium ${
+      className={`px-4 py-1.5 rounded-full flex items-center gap-2 transition-colors font-medium ${
         active
-          ? "bg-brand-soft-highlight text-gray-900 text-sm shadow-sm"
-          : "bg-white text-gray-700 border text-sm border-gray-300 hover:bg-gray-50"
+          ? "bg-brand-soft-highlight text-gray-900 text-xs shadow-sm"
+          : "bg-white text-gray-700 border text-xs border-gray-300 hover:bg-gray-50"
       }`}
     >
       <Icon className="w-4 h-4" />

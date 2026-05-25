@@ -95,12 +95,12 @@ export default function RiskAssessmentCard({ risk }) {
     );
   }
 
-  const cfg = getPriorityConfig(risk.priority_level);
-  // Score bar: max meaningful score is ~100
-  const barWidth = Math.min(risk.risk_score, 100);
+  const cfg      = getPriorityConfig(risk.priority_level);
+  const MAX_SCORE = 130;
+  const barWidth  = Math.round((Math.min(risk.risk_score, MAX_SCORE) / MAX_SCORE) * 100);
 
   return (
-    <div className={`bg-white rounded-xl border shadow-sm overflow-hidden ${cfg.ring}`}>
+    <div className={`bg-white rounded-xl border shadow-sm overflow-hidden `}>
       {/* Header */}
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export default function RiskAssessmentCard({ risk }) {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-medium text-gray-500">Risk Score</span>
-            <span className="text-sm font-bold text-gray-900">{risk.risk_score} / 100</span>
+            <span className="text-sm font-bold text-gray-900">{risk.risk_score} / {MAX_SCORE}</span>
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
@@ -138,7 +138,7 @@ export default function RiskAssessmentCard({ risk }) {
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-200">
             <Bell className="w-4 h-4 text-red-500 shrink-0" />
             <p className="text-xs font-semibold text-red-700">
-              Escalation required — immediate attention needed
+              Escalation required immediate attention needed
             </p>
           </div>
         )}

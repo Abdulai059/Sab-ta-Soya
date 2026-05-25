@@ -1,9 +1,8 @@
 import { Eye, Lock, MapPin, User, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 import { navigateTo } from "@/utils/navigateTo";
 import { useDashboardView } from "@/context/DashboardViewContext";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const SEVERITY_STYLES = {
   critical: "bg-red-50 text-red-700 border-red-200",
@@ -34,27 +33,23 @@ const WORKER_STATUS_COLOR = {
   verified:    "text-emerald-600",
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+const FALLBACK_STYLE = "bg-gray-50 text-gray-600 border-gray-200";
+const CELL = "px-5 py-3.5 border-r border-gray-300 last:border-r-0";
 
 function RiskScoreBadge({ risk }) {
-  if (!risk) {
-    return <span className="text-xs text-gray-300">—</span>;
-  }
+  if (!risk) return <span className="text-xs text-gray-300">—</span>;
 
   const { risk_score, priority_level, escalation_required } = risk;
   const cls = RISK_STYLES[priority_level] ?? "bg-gray-100 text-gray-600 border-gray-200";
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border ${cls}`}>
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${cls}`}>
         <ShieldAlert className="w-3 h-3" />
         {risk_score}
       </span>
       {escalation_required && (
-        <span
-          className="w-2 h-2 rounded-full bg-red-500 animate-pulse"
-          title="Escalation required"
-        />
+        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="Escalation required" />
       )}
     </div>
   );
@@ -70,8 +65,6 @@ function WorkerCell({ worker, status }) {
     );
   }
 
-  const statusColor = WORKER_STATUS_COLOR[status] ?? "text-yellow-600";
-
   return (
     <div className="flex items-center gap-2">
       <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0">
@@ -79,7 +72,7 @@ function WorkerCell({ worker, status }) {
       </div>
       <div className="min-w-0">
         <p className="text-xs font-medium text-gray-800 truncate">{worker.full_name}</p>
-        <p className={`text-[10px] font-medium ${statusColor}`}>
+        <p className={`text-[10px] font-medium ${WORKER_STATUS_COLOR[status] ?? "text-yellow-600"}`}>
           {status?.replace(/_/g, " ")}
         </p>
       </div>
@@ -87,37 +80,29 @@ function WorkerCell({ worker, status }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
-const CELL = "px-5 py-3.5 border-r border-gray-300 last:border-r-0";
-
 export default function ReportTableRow({ report, profile, formatTimeAgo }) {
-  const router   = useRouter();
-  const dashCtx  = useDashboardView();
-  const isInDash = !!dashCtx?.setView;
+  const router  = useRouter();
+  const dashCtx = useDashboardView();
 
   const handleView = () => {
-    if (isInDash) {
+    if (dashCtx?.setView) {
       dashCtx.setView("reportDetail", { id: report.id });
     } else {
       router.push(`/reports/${report.id}`);
     }
   };
 
-  const severityCls = SEVERITY_STYLES[report.severity?.toLowerCase()] ?? "bg-gray-50 text-gray-600 border-gray-200";
-  const statusCls   = STATUS_STYLES[report.status?.toLowerCase()]     ?? "bg-gray-50 text-gray-600 border-gray-200";
+  const severityCls = SEVERITY_STYLES[report.severity?.toLowerCase()] ?? FALLBACK_STYLE;
+  const statusCls   = STATUS_STYLES[report.status?.toLowerCase()]     ?? FALLBACK_STYLE;
 
   return (
     <tr className="border-b border-gray-300 hover:bg-gray-50/60 transition-colors">
-
-      {/* Ref ID */}
       <td className={`${CELL} whitespace-nowrap`}>
         <span className="text-emerald-600 font-mono text-xs font-semibold tracking-wide">
           {report.reference_id}
         </span>
       </td>
 
-      {/* Issue / Location */}
       <td className={CELL}>
         <p className="text-sm text-gray-800 font-medium leading-snug">
           {report.issue_type}
@@ -130,36 +115,30 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
         </p>
       </td>
 
-      {/* Severity */}
       <td className={`${CELL} whitespace-nowrap`}>
-        <span className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-medium border ${severityCls}`}>
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${severityCls}`}>
           {report.severity}
         </span>
       </td>
 
-      {/* Risk score */}
       <td className={`${CELL} whitespace-nowrap`}>
         <RiskScoreBadge risk={report.risk} />
       </td>
 
-      {/* Status */}
       <td className={`${CELL} whitespace-nowrap`}>
-        <span className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-medium border ${statusCls}`}>
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusCls}`}>
           {report.status?.replace(/_/g, " ")}
         </span>
       </td>
 
-      {/* Assigned worker */}
       <td className={CELL}>
         <WorkerCell worker={report.worker} status={report.status} />
       </td>
 
-      {/* Reported time */}
       <td className={`${CELL} whitespace-nowrap text-xs text-gray-400`}>
         {formatTimeAgo(report.created_at)}
       </td>
 
-      {/* Location map link */}
       <td className={`${CELL} whitespace-nowrap`}>
         {report.location?.latitude && report.location?.longitude ? (
           <button
@@ -175,7 +154,6 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
         )}
       </td>
 
-      {/* Actions */}
       <td className={`${CELL} whitespace-nowrap`}>
         <div className="flex items-center gap-1.5">
           <button
@@ -195,7 +173,6 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
           )}
         </div>
       </td>
-
     </tr>
   );
 }

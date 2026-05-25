@@ -151,30 +151,7 @@ export default function DashboardSidebar({ open, onClose }) {
         </button>
       </div>
 
-      {/* USER CARD */}
-      <div className="px-4 py-5 border-b border-gray-100">
-        {authLoading || !profile ? (
-          <div className="flex items-center gap-3 animate-pulse">
-            <div className="w-11 h-11 rounded-2xl bg-gray-200 shrink-0" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3 bg-gray-200 rounded w-3/4" />
-              <div className="h-3 bg-gray-200 rounded w-1/2" />
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              {name.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{name}</p>
-              <span className={`inline-flex mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${roleMeta.color}`}>
-                {roleMeta.label}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
+    
 
       {/* NAV */}
       <nav className="flex-1 px-3 py-4 space-y-6">

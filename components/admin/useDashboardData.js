@@ -14,12 +14,12 @@ import { daysAgo, buildInitials, formatDate } from "./utils";
 const DONE_STATUSES = ["disposed", "verified"];
 
 const RISK_FACTORS = [
-  { key: "near_school",        label: "Near School",       points: 15 },
-  { key: "near_water_source",  label: "Near Water Source", points: 15 },
-  { key: "flood_zone",         label: "Flood Zone",        points: 10 },
-  { key: "drought_zone",       label: "Drought Zone",      points: 10 },
-  { key: "repeated_incident",  label: "Repeated Incident", points: 10 },
-  { key: "escalation_required",label: "Escalation Req.",   points: 0  },
+  { key: "near_school",         label: "Near School",       points: 15 },
+  { key: "near_water_source",   label: "Near Water Source", points: 15 },
+  { key: "flood_zone",          label: "Flood Zone",        points: 10 },
+  { key: "drought_zone",        label: "Drought Zone",      points: 10 },
+  { key: "repeated_incident",   label: "Repeated Incident", points: 10 },
+  { key: "escalation_required", label: "Escalation Req.",   points: 0  },
 ];
 
 const PRIORITY_LEVELS = ["critical", "high", "medium", "low"];
