@@ -1,6 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
+export const dynamic = "force-dynamic";
+
+import nextDynamic from "next/dynamic";
 import { useEffect, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -29,7 +31,7 @@ import MobileWorkersOverlay from "@/components/maps/MobileWorkersOverlay";
 import WorkersFab from "@/components/maps/WorkersFab";
 
 // Leaflet must be client-only
-const MapView = dynamic(() => import("@/components/maps/MapView"), {
+const MapView = nextDynamic(() => import("@/components/maps/MapView"), {
   ssr: false,
   loading: () => (
     <div className="flex-1 flex items-center justify-center bg-stone-50 text-emerald-500 font-mono text-xs tracking-widest animate-pulse">
