@@ -1,42 +1,56 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
-import toast from "react-hot-toast";
 
 async function fetchReportDetail(reportId) {
+  // Core report — no FK hints to avoid silent query failures
   const { data: reportData, error: reportError } = await supabase
     .from("sanitation_reports")
     .select(
-      `*,
-       location:locations(
-         id, name, area_name, landmark, latitude, longitude,
-         type, status, water_access, climate_risk, description
-       ),
-       community:communities(name, district, region, latitude, longitude),
-       reported_by_profile:profiles!reported_by(full_name, phone, role, organization),
-       climate_event:climate_events(event_type, severity, start_date, end_date, impact_notes)`
+      `id, reference_id, issue_type, severity, health_risk, description,
+       reporter_phone, status, created_at, updated_at,
+       location_id, reported_by, affected_people_count, community_id,
+       is_anonymous, assigned_to,
+       location:locations(id, name, area_name, landmark, latitude, longitude, type, climate_risk),
+       community:communities(name, district, region)`
     )
     .eq("id", reportId)
     .single();
 
-  if (reportError) {
-    toast.error("Failed to load report details");
-    throw reportError;
+  if (reportError) throw reportError;
+
+  // Fetch worker and reporter profiles separately to avoid FK-hint failures
+  const profileIds = [reportData.assigned_to, reportData.reported_by].filter(Boolean);
+  let profileMap = {};
+  if (profileIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, phone, role")
+      .in("id", profileIds);
+    profileMap = Object.fromEntries((profiles || []).map((p) => [p.id, p]));
   }
+
+  const report = {
+    ...reportData,
+    worker:               reportData.assigned_to ? (profileMap[reportData.assigned_to] ?? null) : null,
+    reported_by_profile:  reportData.reported_by  ? (profileMap[reportData.reported_by]  ?? null) : null,
+  };
 
   // Location images
   let locationImages = [];
-  if (reportData?.location?.id) {
+  if (reportData?.location_id) {
     const { data: imagesData } = await supabase
       .from("location_images")
       .select("id, image_url, image_type, caption")
-      .eq("location_id", reportData.location.id)
+      .eq("location_id", reportData.location_id)
       .order("created_at", { ascending: true });
     locationImages = imagesData || [];
   }
 
+<<<<<<< HEAD
   // Assignments — include service_tasks so we can show task progress
   const { data: assignmentsData } = await supabase
     .from("report_assignments")
@@ -50,17 +64,51 @@ async function fetchReportDetail(reportId) {
     .order("assigned_at", { ascending: false });
 
   // Status history
+=======
+  // Status history — no FK hint on changed_by
+>>>>>>> feature/update
   const { data: historyData } = await supabase
     .from("report_status_history")
-    .select(`*, changed_by_profile:profiles!changed_by(full_name, role)`)
+    .select("id, old_status, new_status, changed_at, notes, changed_by")
     .eq("report_id", reportId)
     .order("changed_at", { ascending: false });
 
+  // Enrich history with changer profiles
+  const changerIds = [...new Set((historyData || []).map((h) => h.changed_by).filter(Boolean))];
+  let changerMap = {};
+  if (changerIds.length > 0) {
+    const { data: changers } = await supabase
+      .from("profiles")
+      .select("id, full_name, role")
+      .in("id", changerIds);
+    changerMap = Object.fromEntries((changers || []).map((p) => [p.id, p]));
+  }
+  const statusHistory = (historyData || []).map((h) => ({
+    ...h,
+    changed_by_profile: h.changed_by ? (changerMap[h.changed_by] ?? null) : null,
+  }));
+
+  // Risk assessment — uses created_at (schema has no calculated_at column)
+  const { data: riskData, error: riskError } = await supabase
+    .from("risk_assessments")
+    .select(
+      `id, risk_score, priority_level, near_school, near_water_source,
+       flood_zone, drought_zone, repeated_incident, affected_children_count,
+       escalation_required, created_at`
+    )
+    .eq("report_id", reportId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  console.log("[RiskAssessment] reportId:", reportId, "| data:", riskData, "| error:", riskError?.message ?? null);
+
   return {
-    report: reportData,
-    assignments: assignmentsData || [],
-    statusHistory: historyData || [],
+    report,
+    statusHistory,
     locationImages,
+    riskAssessment: riskData ?? null,
+    assignments: [],
   };
 }
 
@@ -74,11 +122,43 @@ export function useReportDetail(reportId) {
     enabled: !!reportId,
   });
 
+  // Real-time: watch this specific report for status changes
+  useEffect(() => {
+    if (!reportId) return;
+
+    const channel = supabase
+      .channel(`report_detail_${reportId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "sanitation_reports", filter: `id=eq.${reportId}` },
+        (payload) => {
+          // Patch status immediately
+          qc.setQueryData(queryKey, (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              report: {
+                ...old.report,
+                status:     payload.new.status,
+                assigned_to: payload.new.assigned_to,
+                updated_at: payload.new.updated_at,
+              },
+            };
+          });
+          qc.invalidateQueries({ queryKey });
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [reportId, qc, queryKey]);
+
   return {
-    report:        data?.report        ?? null,
-    assignments:   data?.assignments   ?? [],
-    statusHistory: data?.statusHistory ?? [],
-    locationImages: data?.locationImages ?? [],
+    report:          data?.report          ?? null,
+    assignments:     data?.assignments     ?? [],
+    statusHistory:   data?.statusHistory   ?? [],
+    locationImages:  data?.locationImages  ?? [],
+    riskAssessment:  data?.riskAssessment  ?? null,
     loading,
     refetch: () => qc.invalidateQueries({ queryKey }),
   };

@@ -12,9 +12,7 @@ export default function ProtectedRoute({
   roles = [],
 }) {
   const { user, profile, loading } = useAuth();
-
   const router = useRouter();
-
   const hasRequiredPermissions = useHasAnyPermission(permissions);
 
   useEffect(() => {
@@ -41,25 +39,16 @@ export default function ProtectedRoute({
     if (roles.length > 0 && profile?.role && !roles.includes(profile.role)) {
       router.push(roleRoutes[profile?.role] ?? "/operator");
     }
-  }, [
-    user,
-    profile,
-    loading,
-    permissions,
-    roles,
-    hasRequiredPermissions,
-    router,
-  ]);
+  }, [user, profile, loading, permissions, roles, hasRequiredPermissions, router]);
 
+  // While auth resolves, render nothing — the shell already shows the skeleton
+  if (loading) return null;
+
+  // Not logged in — redirect in flight
   if (!user) return null;
 
-  if (permissions.length > 0 && !hasRequiredPermissions) {
-    return null;
-  }
-
-  if (roles.length > 0 && profile?.role && !roles.includes(profile.role)) {
-    return null;
-  }
+  if (permissions.length > 0 && !hasRequiredPermissions) return null;
+  if (roles.length > 0 && profile?.role && !roles.includes(profile.role)) return null;
 
   return children;
 }

@@ -43,41 +43,38 @@ function TableRowSkeleton() {
   );
 }
 
+const TABLE_HEADERS = ["Ref ID", "Issue / Location", "Severity", "Status", "Reported", "Location", "Actions"];
+
 export default function ReportsSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 animate-pulse">
       <div className="max-w-[1500px] mx-auto">
-
-        {/* Page header */}
         <div className="mb-8">
           <Bone className="w-56 h-8 mb-3" />
           <Bone className="w-80 h-4" />
         </div>
 
-        {/* Stats cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <StatsCardSkeleton key={i} />
-          ))}
+          {Array.from({ length: 5 }).map((_, i) => <StatsCardSkeleton key={i} />)}
         </div>
 
-        {/* Filter bar */}
         <div className="flex flex-wrap gap-3 mb-6 mt-4 bg-white p-1">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Bone key={i} className="w-24 h-9 rounded-lg" />
-          ))}
+          {Array.from({ length: 5 }).map((_, i) => <Bone key={i} className="w-24 h-9 rounded-lg" />)}
           <div className="ml-auto">
             <Bone className="w-52 h-9 rounded-lg" />
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-white rounded-sm border border-gray-200 shadow-sm overflow-hidden mb-4">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+<<<<<<< HEAD
                   {["Ref ID", "Issue / Location", "Severity", "Status", "Assigned To", "Reported", "Location", "Actions"].map((h) => (
+=======
+                  {TABLE_HEADERS.map((h) => (
+>>>>>>> feature/update
                     <th key={h} className="px-5 py-4 text-left">
                       <Bone className="w-16 h-3" />
                     </th>
@@ -85,24 +82,18 @@ export default function ReportsSkeleton() {
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <TableRowSkeleton key={i} />
-                ))}
+                {Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} />)}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Pagination */}
         <div className="flex items-center justify-between px-1">
           <Bone className="w-32 h-4" />
           <div className="flex gap-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Bone key={i} className="w-9 h-9 rounded-lg" />
-            ))}
+            {Array.from({ length: 4 }).map((_, i) => <Bone key={i} className="w-9 h-9 rounded-lg" />)}
           </div>
         </div>
-
       </div>
     </div>
   );

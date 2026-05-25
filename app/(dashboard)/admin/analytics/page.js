@@ -9,19 +9,17 @@ import {
   Clock,
 } from "lucide-react";
 import { useDashboardData } from "@/components/admin/useDashboardData";
-import { Card, CardTitle } from "@/components/admin/DashboardCard";
 import MetricCard from "@/components/admin/MetricCard";
 import TrendChart from "@/components/admin/TrendChart";
-import SeverityChart from "@/components/admin/SeverityChart";
+import RiskAssessmentChart from "@/components/admin/RiskAssessmentChart";
+import RiskScoringChart from "@/components/admin/RiskScoringChart";
 import IssueTypesChart from "@/components/admin/IssueTypesChart";
 import StatusSnapshot from "@/components/admin/StatusSnapshot";
-import WorkerRow from "@/components/admin/WorkerRow";
 import ViewCasesModal from "@/components/admin/ViewCasesModal";
-import { WorkersEmptyState } from "@/components/admin/DashboardStates";
 import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
 
 export default function AuthorityDashboard() {
-  const { metrics, severity, issueTypes, trend, statusSnap, workers, loading } =
+  const { metrics, issueTypes, trend, statusSnap, riskPriority, riskScoring, loading } =
     useDashboardData();
 
   const [selectedWorker, setSelectedWorker] = useState(null);
@@ -80,11 +78,11 @@ export default function AuthorityDashboard() {
         />
       </div>
 
-      {/* Trend + Severity */}
+      {/* Trend + Risk Assessment breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TrendChart trend={trend} />
-        <SeverityChart
-          severity={severity}
+        <RiskAssessmentChart
+          riskPriority={riskPriority}
           resolved={metrics.resolved}
           total={metrics.total}
         />
@@ -96,8 +94,11 @@ export default function AuthorityDashboard() {
         <StatusSnapshot statusSnap={statusSnap} />
       </div>
 
+      {/* Risk scoring factor breakdown */}
+      <RiskScoringChart riskScoring={riskScoring} />
+
       {/* Worker performance */}
-      <Card>
+      {/* <Card>
         <CardTitle>Worker performance — resolved cases</CardTitle>
         {workers.length === 0 ? (
           <WorkersEmptyState />
@@ -111,7 +112,7 @@ export default function AuthorityDashboard() {
             />
           ))
         )}
-      </Card>
+      </Card> */}
 
       <p className="text-center text-xs text-gray-300 pb-4">
         Sab&apos;ta Soya · UNICEF StartUp Lab 2026 · Northern Ghana

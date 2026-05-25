@@ -547,21 +547,23 @@ export default function ReportForm() {
         if (climateData) climateEventId = climateData.id;
       }
 
-      const { error } = await supabase.from("sanitation_reports").insert({
-        reference_id: generateReferenceId(),
-        issue_type: form.issueType,
-        severity: form.severity,
-        description: form.description || null,
-        health_risk: form.healthRisk,
-        reporter_phone: form.phone,
-        affected_people_count: form.affectedCount ? parseInt(form.affectedCount) : null,
-        is_anonymous: form.isAnonymous,
-        status: "pending",
-        community_id: communityId,
-        location_id: locationId,
-        climate_event_id: climateEventId,
-        reported_by: profile?.id || null,
-      });
+      const { error } = await supabase
+        .from("sanitation_reports")
+        .insert({
+          reference_id:          generateReferenceId(),
+          issue_type:            form.issueType,
+          severity:              form.severity,
+          description:           form.description || null,
+          health_risk:           form.healthRisk,
+          reporter_phone:        form.phone,
+          affected_people_count: form.affectedCount ? parseInt(form.affectedCount) : null,
+          is_anonymous:          form.isAnonymous,
+          status:                "pending",
+          community_id:          communityId,
+          location_id:           locationId,
+          climate_event_id:      climateEventId,
+          reported_by:           profile?.id || null,
+        });
 
       if (error) throw error;
 

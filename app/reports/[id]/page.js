@@ -7,12 +7,12 @@ import { useReportDetail } from "@/hooks/useReportDetail";
 import { useDashboardView } from "@/context/DashboardViewContext";
 import ReportHeader from "@/components/reports/detail/ReportHeader";
 import ReportInfo from "@/components/reports/detail/ReportInfo";
-import ClimateEventBanner from "@/components/reports/detail/ClimateEventBanner";
-import AssignmentsList from "@/components/reports/detail/AssignmentsList";
+import WorkflowRoadmap from "@/components/reports/detail/WorkflowRoadmap";
 import StatusHistory from "@/components/reports/detail/StatusHistory";
 import QuickActions from "@/components/reports/detail/QuickActions";
 import LocationImages from "@/components/reports/detail/LocationImages";
 import ReportDetailSkeleton from "@/components/reports/detail/ReportDetailSkeleton";
+import RiskAssessmentCard from "@/components/reports/detail/RiskAssessmentCard";
 
 export default function ReportDetailPage() {
   const { profile } = useAuth();
@@ -23,7 +23,7 @@ export default function ReportDetailPage() {
 
   const reportId = isInDashboard ? dashCtx.viewParams?.id : params?.id;
 
-  const { report, assignments, statusHistory, locationImages, loading } =
+  const { report, statusHistory, locationImages, riskAssessment, loading } =
     useReportDetail(reportId);
 
   const handleBack = () => {
@@ -40,8 +40,13 @@ export default function ReportDetailPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
+<<<<<<< HEAD
           <h2 className="text-xl font-bold text-gray-900 mb-2">Report not found</h2>
           <button onClick={handleBack} className="text-emerald-600 hover:text-emerald-700 text-sm">
+=======
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Report not found</h2>
+          <button onClick={handleBack} className="text-emerald-600 hover:text-emerald-700">
+>>>>>>> feature/update
             ← Back to reports
           </button>
         </div>
@@ -50,6 +55,7 @@ export default function ReportDetailPage() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="max-w-6xl mx-auto space-y-6">
       <button
         onClick={handleBack}
@@ -58,19 +64,30 @@ export default function ReportDetailPage() {
         <ArrowLeft className="w-4 h-4" />
         Back to reports
       </button>
+=======
+    <div className="min-h-screen bg-gray-50  pt-0">
+      <div className="max-w-6xl mx-auto">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to reports
+        </button>
+>>>>>>> feature/update
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <ReportHeader report={report} />
               <ReportInfo report={report} />
-              <ClimateEventBanner climateEvent={report.climate_event} />
             </div>
 
-            <AssignmentsList assignments={assignments} />
+            <WorkflowRoadmap report={report} statusHistory={statusHistory} />
           </div>
 
           <div className="space-y-6">
+            <RiskAssessmentCard risk={riskAssessment} />
             <LocationImages
               images={locationImages}
               locationName={report.location?.name}

@@ -4,7 +4,7 @@ export default function StatusSnapshot({ statusSnap }) {
   return (
     <Card>
       <CardTitle>Status snapshot</CardTitle>
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-3 gap-2.5">
         {statusSnap.map((s) => (
           <div
             key={s.label}

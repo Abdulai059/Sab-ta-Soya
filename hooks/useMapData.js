@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchLocations,
@@ -39,12 +39,14 @@ export function useMapData() {
   const { data, isLoading: loading } = useQuery({
     queryKey: QUERY_KEYS.mapData,
     queryFn: fetchMapData,
-    // When data loads for the first time, set the first location as active
-    select: (d) => d,
-    onSuccess: (d) => {
-      setActiveLocation((prev) => prev ?? d.locations[0] ?? null);
-    },
   });
+
+  // Set the first location as active once data loads (replaces removed onSuccess)
+  useEffect(() => {
+    if (data?.locations?.length && activeLocation === null) {
+      setActiveLocation(data.locations[0]);
+    }
+  }, [data, activeLocation]);
 
   return {
     locations:       data?.locations       ?? [FALLBACK_LOCATION],

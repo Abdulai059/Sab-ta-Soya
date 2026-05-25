@@ -165,7 +165,7 @@ export default function MapsPage() {
   if (loading || !activeLocation) return <MapLoadingScreen />;
 
   return (
-    <div className="flex flex-col h-[91vh] max-w-392 mx-auto bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
       {/* Deep-link handler — reads ?lat=&lng=&name= from URL */}
       <Suspense fallback={null}>
         <DeepLinkHandler setActiveLocation={setActiveLocation} />
