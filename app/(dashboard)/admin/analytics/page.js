@@ -80,7 +80,7 @@ export default function AuthorityDashboard() {
         />
       </div>
 
-      {/* Trend + Risk Assessment breakdown */}
+      {/* Trend  Risk Assessment breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <TrendChart trend={trend} />
         <RiskAssessmentChart
