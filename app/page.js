@@ -3,10 +3,14 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import dynamic from "next/dynamic";
-import Topbar from "@/components/ui/PublicNavbar";
+import ChainPage from "@/components/ui/ChainPage";
+import SecurityDashboard from "@/components/ui/Securitychart";
 
-const MapsPage = dynamic(() => import("./maps/page"), { ssr: false });
+const ROLE_ROUTES = {
+  admin:            "/admin",
+  district_officer: "/district-officer",
+  ngo:              "/ngo",
+};
 
 export default function HomePage() {
   const { user, profile, loading, mounted } = useAuth();
@@ -14,32 +18,34 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && mounted && user && profile) {
-      const roleRoutes = {
-        admin: "/admin",
-        district_officer: "/district-officer",
-        ngo: "/ngo",
-      };
-      const destination = roleRoutes[profile.role] ?? "/operator";
-      if (destination) router.push(destination);
+      router.replace(ROLE_ROUTES[profile.role] ?? "/operator");
     }
   }, [user, profile, loading, mounted, router]);
 
-  // if (!mounted || loading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-white">
-  //       <div className="w-10 h-10 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
-  //     </div>
-  //   );
-  // }
+  // While auth is resolving (initial load / refresh) show a minimal spinner
+  // so there's no flash of the wrong content
+  if (!mounted || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-9 h-9 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
+      </div>
+    );
+  }
 
-  if (user && profile) return null;
+  // Logged-in user — show spinner while router.replace() is in flight
+  if (user && profile) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-9 h-9 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
+      </div>
+    );
+  }
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[#f3f4f6]">
-      <Topbar />
-      <main className="flex-1 pt-14">
-        <MapsPage />
-      </main>
+  // Not logged in — show the public landing page
+  return (<div>
+    <ChainPage />
+    {/* <SecurityDashboard/> */}
     </div>
   );
+  
 }

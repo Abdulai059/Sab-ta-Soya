@@ -1,117 +1,129 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-:root {
-  /* ── Brand Colors ── */
-  --brand-primary: #d5f6e5;
-  --brand-soft: #d5f6e5;
-  --brand-muted: #f4fdf8;
-  --brand-accent: #fdc700;
-  --brand-highlight: #e7f68f;
-  --brand-soft-highlight: #e7f68f;
-  --brand-yellowish-green: #a5c94d;
-  --brand-light-green: #d5f6e5;
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 
-  /* ── Status / Role Colors ── */
-  --status-danger: #ef4444;
-  --status-info: #14b8a6;
-  --status-warning: #facc15;
-
-  /* ── Surface Colors ── */
-  --surface-page: #ffffff;
-  --surface-raised: #f9fafb;
-  --surface-sunken: #f3f4f6;
-  --surface-overlay: #e5e7eb;
-
-  /* ── Text Colors ── */
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
-  --text-inverted: #ffffff;
-
-  /* ── Border Colors ── */
-  --border-default: #e5e7eb;
-  --border-strong: #d1d5db;
-  --border-subtle: #f3f4f6;
-
-  /* ── Interactive ── */
-  --interactive-default: #2563eb;
-  --interactive-hover: #1e40af;
-
-  /* ── Dark UI ── */
-  --dark-bg: #171717;
-  --dark-surface: #262626;
-  --dark-raised: #2f2f2f;
-  --dark-text: #ededed;
-  --dark-muted: #d4d4d4;
+html,
+body {
+  height: 100%;
 }
 
-/* Tailwind v4 Theme Tokens */
-@theme inline {
-  /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
+:root {
   /* Brand */
-  --color-brand-primary: var(--brand-primary);
-  --color-brand-soft: var(--brand-soft);
-  --color-brand-muted: var(--brand-muted);
-  --color-brand-highlight: var(--brand-highlight);
-  --color-brand-accent: var(--brand-accent);
-  --color-brand-soft-highlight: var(--brand-soft-highlight);
-  --color-brand-yellowish-green: var(--brand-yellowish-green);
-  --color-brand-light-green:var(--brand-light-green);
+  --brand-primary:        #d5f6e5;
+  --brand-soft:           #d5f6e5;
+  --brand-muted:          #f4fdf8;
+  --brand-accent:         #fdc700;
+  --brand-highlight:      #e7f68f;
+  --brand-soft-highlight: #e7f68f;
+  --brand-yellowish-green:#a5c94d;
+  --brand-light-green:    #d5f6e5;
 
   /* Status */
-  --color-status-danger: var(--status-danger);
-  --color-status-info: var(--status-info);
-  --color-status-warning: var(--status-warning);
+  --status-danger:  #ef4444;
+  --status-info:    #14b8a6;
+  --status-warning: #facc15;
 
-  /* Surface */
-  --color-surface-page: var(--surface-page);
-  --color-surface-raised: var(--surface-raised);
-  --color-surface-sunken: var(--surface-sunken);
-  --color-surface-overlay: var(--surface-overlay);
+  /* Surfaces */
+  --surface-page:    #f3f4f6;
+  --surface-raised:  #f9fafb;
+  --surface-sunken:  #f3f4f6;
+  --surface-overlay: #e5e7eb;
 
   /* Text */
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-  --color-text-muted: var(--text-muted);
-  --color-text-inverted: var(--text-inverted);
+  --text-primary:   #111827;
+  --text-secondary: #4b5563;
+  --text-muted:     #9ca3af;
+  --text-inverted:  #ffffff;
 
   /* Borders */
-  --color-border-default: var(--border-default);
-  --color-border-strong: var(--border-strong);
-  --color-border-subtle: var(--border-subtle);
+  --border-default: #e5e7eb;
+  --border-strong:  #d1d5db;
+  --border-subtle:  #f3f4f6;
 
   /* Interactive */
-  --color-interactive-default: var(--interactive-default);
-  --color-interactive-hover: var(--interactive-hover);
+  --interactive-default: #2563eb;
+  --interactive-hover:   #1e40af;
 
-  /* Dark */
-  --color-dark-bg: var(--dark-bg);
-  --color-dark-surface: var(--dark-surface);
-  --color-dark-raised: var(--dark-raised);
-  --color-dark-text: var(--dark-text);
-  --color-dark-muted: var(--dark-muted);
+  /* Dark UI */
+  --dark-bg:      #171717;
+  --dark-surface: #262626;
+  --dark-raised:  #2f2f2f;
+  --dark-text:    #ededed;
+  --dark-muted:   #d4d4d4;
 }
 
-@media (prefers-color-scheme: dark) {
+/* Dark mode overrides — disabled until full dark mode is implemented */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --surface-page: #0a0a0a;
     --text-primary: #ededed;
   }
+} */
+
+/* ── Tailwind v4 theme tokens ─────────────────────────────────────────────── */
+
+@theme inline {
+  --font-sans: "Inter", "DM Sans", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+
+  /* Brand */
+  --color-brand-primary:        var(--brand-primary);
+  --color-brand-soft:           var(--brand-soft);
+  --color-brand-muted:          var(--brand-muted);
+  --color-brand-highlight:      var(--brand-highlight);
+  --color-brand-accent:         var(--brand-accent);
+  --color-brand-soft-highlight: var(--brand-soft-highlight);
+  --color-brand-yellowish-green:var(--brand-yellowish-green);
+  --color-brand-light-green:    var(--brand-light-green);
+
+  /* Status */
+  --color-status-danger:  var(--status-danger);
+  --color-status-info:    var(--status-info);
+  --color-status-warning: var(--status-warning);
+
+  /* Surfaces */
+  /* --color-surface-page:    var(--surface-page); */
+  --color-surface-raised:  var(--surface-raised);
+  --color-surface-sunken:  var(--surface-sunken);
+  --color-surface-overlay: var(--surface-overlay);
+
+  /* Text */
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--text-muted);
+  --color-text-inverted:  var(--text-inverted);
+
+  /* Borders */
+  --color-border-default: var(--border-default);
+  --color-border-strong:  var(--border-strong);
+  --color-border-subtle:  var(--border-subtle);
+
+  /* Interactive */
+  --color-interactive-default: var(--interactive-default);
+  --color-interactive-hover:   var(--interactive-hover);
+
+  /* Dark */
+  --color-dark-bg:      var(--dark-bg);
+  --color-dark-surface: var(--dark-surface);
+  --color-dark-raised:  var(--dark-raised);
+  --color-dark-text:    var(--dark-text);
+  --color-dark-muted:   var(--dark-muted);
 }
+
+/* ── Body defaults ────────────────────────────────────────────────────────── */
 
 body {
-  background: var(--surface-page);
+  background-color: #f7f6f1;
   color: var(--text-primary);
-  font-family: var(--font-geist-sans), "DM Sans", sans-serif;
+  font-family: "Inter", "DM Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Mobile touch improvements */
+/* ── Mobile touch improvements ────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
-  /* Improve tap targets — only top-level interactive elements, not inline badges */
   nav button,
   nav a,
   form button,
@@ -119,12 +131,10 @@ body {
     min-height: 44px;
   }
 
-  /* Smooth scrolling on mobile */
   * {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Prevent text selection on buttons */
   button {
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
@@ -132,141 +142,66 @@ body {
   }
 }
 
-/* Custom utility classes */
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+
 .active\:scale-98:active {
   transform: scale(0.98);
 }
 
-/* ── Map UI Animations ──────────────────────────────────────────────────────── */
+/* ── Animations ───────────────────────────────────────────────────────────── */
 
-/* Fade + slide in from top */
 @keyframes slideInFromTop {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Fade + slide in from bottom */
 @keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Fade + slide in from left */
 @keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Fade + slide in from right */
 @keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Gentle scale-in for cards / panels */
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-/* Shimmer for loading skeletons */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-/* Radar pulse for live tracking dot */
 @keyframes radarPulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.6;
-  }
-  70% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
+  0%   { transform: scale(1);   opacity: 0.6; }
+  70%  { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
 }
 
-/* Utility classes */
-.animate-slide-in-top {
-  animation: slideInFromTop 0.25s ease both;
-}
-.animate-slide-in-bottom {
-  animation: slideInFromBottom 0.25s ease both;
-}
-.animate-slide-in-left {
-  animation: slideInFromLeft 0.3s ease both;
-}
-.animate-slide-in-right {
-  animation: slideInFromRight 0.3s ease both;
-}
-.animate-scale-in {
-  animation: scaleIn 0.2s ease both;
-}
+/* Animation utility classes */
+.animate-slide-in-top    { animation: slideInFromTop    0.25s ease both; }
+.animate-slide-in-bottom { animation: slideInFromBottom 0.25s ease both; }
+.animate-slide-in-left   { animation: slideInFromLeft   0.3s  ease both; }
+.animate-slide-in-right  { animation: slideInFromRight  0.3s  ease both; }
+.animate-scale-in        { animation: scaleIn           0.2s  ease both; }
 
-/* Staggered children — add to parent, children get delay via nth-child */
-.stagger-children > *:nth-child(1) {
-  animation-delay: 0ms;
-}
-.stagger-children > *:nth-child(2) {
-  animation-delay: 60ms;
-}
-.stagger-children > *:nth-child(3) {
-  animation-delay: 120ms;
-}
-.stagger-children > *:nth-child(4) {
-  animation-delay: 180ms;
-}
-.stagger-children > *:nth-child(5) {
-  animation-delay: 240ms;
-}
-.stagger-children > *:nth-child(6) {
-  animation-delay: 300ms;
-}
-.stagger-children > *:nth-child(7) {
-  animation-delay: 360ms;
-}
-.stagger-children > *:nth-child(8) {
-  animation-delay: 420ms;
-}
+/* Staggered children */
+.stagger-children > *:nth-child(1) { animation-delay: 0ms;   }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms;  }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
 
 /* Skeleton shimmer */
 .skeleton {
@@ -275,7 +210,7 @@ body {
   animation: shimmer 1.4s infinite;
 }
 
-/* Radar pulse ring (used on live tracking indicator) */
+/* Radar pulse ring */
 .radar-pulse::before {
   content: "";
   position: absolute;
@@ -285,20 +220,10 @@ body {
   animation: radarPulse 1.8s ease-out infinite;
 }
 
-/* Smooth panel transitions */
-.panel-enter {
-  animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+/* Panel slide-in */
+.panel-enter { animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-/* Tailwind animate-in helpers (used in MapHeader dropdown) */
-.animate-in {
-  animation-fill-mode: both;
-}
-.fade-in {
-  animation-name: scaleIn;
-  animation-duration: 0.15s;
-}
-.slide-in-from-top-1 {
-  animation-name: slideInFromTop;
-  animation-duration: 0.15s;
-}
+/* Tailwind animate-in helpers */
+.animate-in          { animation-fill-mode: both; }
+.fade-in             { animation-name: scaleIn;        animation-duration: 0.15s; }
+.slide-in-from-top-1 { animation-name: slideInFromTop; animation-duration: 0.15s; }

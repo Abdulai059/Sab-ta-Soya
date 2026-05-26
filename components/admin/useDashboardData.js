@@ -34,13 +34,14 @@ const EMPTY_STATE = {
     openSinceYesterday: 0,
     resolvedInLastWeek: 0,
   },
-  severity:    [],
-  issueTypes:  [],
-  trend:       [],
-  statusSnap:  [],
-  workers:     [],
-  riskPriority:[],
-  riskScoring: [],
+  severity:      [],
+  issueTypes:    [],
+  trend:         [],
+  statusSnap:    [],
+  workers:       [],
+  riskPriority:  [],
+  riskScoring:   [],
+  recentReports: [],
 };
 
 async function fetchReports(since) {
@@ -48,7 +49,6 @@ async function fetchReports(since) {
     .from("sanitation_reports")
     .select("id, severity, status, issue_type, created_at, updated_at, assigned_to")
     .gte("created_at", since.toISOString());
-
   if (error) throw error;
   return data ?? [];
 }
@@ -59,7 +59,6 @@ async function fetchRiskAssessments() {
     .select(
       "priority_level, risk_score, near_school, near_water_source, flood_zone, drought_zone, repeated_incident, escalation_required, affected_children_count"
     );
-
   if (error) throw error;
   return data ?? [];
 }
@@ -71,16 +70,23 @@ async function fetchResolvedReports() {
       "id, status, updated_at, assigned_to, worker:profiles!sanitation_reports_assigned_to_fkey(id, full_name, role)"
     )
     .in("status", DONE_STATUSES);
-
   if (error) throw error;
   return data ?? [];
 }
 
-const normalizeStatus = (report) =>
-  (report.status || "").toLowerCase().trim();
+async function fetchRecentReports() {
+  const { data, error } = await supabase
+    .from("sanitation_reports")
+    .select("id, issue_type, severity, status, created_at, reference_id")
+    .order("created_at", { ascending: false })
+    .limit(2);
+  if (error) throw error;
+  return data ?? [];
+}
 
-const isDone    = (report) => DONE_STATUSES.includes(normalizeStatus(report));
-const isPending = (report) => normalizeStatus(report) === "pending";
+const normalizeStatus = (report) => (report.status || "").toLowerCase().trim();
+const isDone          = (report) => DONE_STATUSES.includes(normalizeStatus(report));
+const isPending       = (report) => normalizeStatus(report) === "pending";
 
 const countBy = (arr, key) =>
   arr.reduce((acc, item) => {
@@ -98,7 +104,7 @@ function buildMetrics(reports, sevenDaysAgo, yesterday) {
 
   const totalInLastWeek    = reports.filter((r) => new Date(r.created_at) >= sevenDaysAgo).length;
   const openSinceYesterday = reports.filter((r) => isPending(r) && new Date(r.created_at) >= yesterday).length;
-  const resolvedInLastWeek = reports.filter((r) => isDone(r)    && new Date(r.created_at) >= sevenDaysAgo).length;
+  const resolvedInLastWeek = reports.filter((r) => isDone(r) && new Date(r.created_at) >= sevenDaysAgo).length;
 
   const responseTimes = reports
     .filter(isDone)
@@ -123,7 +129,6 @@ function buildSeverity(reports) {
 function buildIssueTypes(reports) {
   return Object.entries(countBy(reports, "issue_type"))
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 6)
     .map(([type, count]) => ({ type, count }));
 }
 
@@ -133,7 +138,6 @@ function buildTrend(reports) {
     acc[day] = (acc[day] || 0) + 1;
     return acc;
   }, {});
-
   return Object.entries(dayMap).map(([day, incidents]) => ({ day, incidents }));
 }
 
@@ -157,15 +161,9 @@ function buildRiskPriority(riskRows) {
 
 function buildRiskScoring(riskRows) {
   const total = riskRows.length || 1;
-
   return RISK_FACTORS.map(({ key, label, points }) => {
     const count = riskRows.filter((r) => r[key]).length;
-    return {
-      factor: label,
-      points,
-      count,
-      pct: Math.round((count / total) * 100),
-    };
+    return { factor: label, points, count, pct: Math.round((count / total) * 100) };
   });
 }
 
@@ -173,14 +171,11 @@ function buildWorkers(resolvedReports) {
   const workerMap = resolvedReports.reduce((acc, report) => {
     const w = report.worker;
     if (!w?.id || !w?.full_name) return acc;
-
     if (!acc[w.id]) {
       acc[w.id] = { id: w.id, name: w.full_name, role: w.role, cases: 0, lastResolved: null };
     }
-
-    acc[w.id].cases        += 1;
-    acc[w.id].lastResolved  = report.updated_at;
-
+    acc[w.id].cases       += 1;
+    acc[w.id].lastResolved = report.updated_at;
     return acc;
   }, {});
 
@@ -203,34 +198,32 @@ async function fetchDashboard() {
   const sevenDaysAgo  = daysAgo(7);
   const yesterday     = daysAgo(1);
 
-  const [reports, riskRows, resolvedReports] = await Promise.all([
+  const [reports, riskRows, resolvedReports, recentReports] = await Promise.all([
     fetchReports(thirtyDaysAgo),
     fetchRiskAssessments(),
     fetchResolvedReports(),
+    fetchRecentReports(),
   ]);
 
-  if (reports.length === 0) {
-    console.warn("[Dashboard] No reports in the last 30 days — data may be older than the window.");
-  }
-
   return {
-    metrics:      buildMetrics(reports, sevenDaysAgo, yesterday),
-    severity:     buildSeverity(reports),
-    issueTypes:   buildIssueTypes(reports),
-    trend:        buildTrend(reports),
-    statusSnap:   buildStatusSnapshot(reports),
-    riskPriority: buildRiskPriority(riskRows),
-    riskScoring:  buildRiskScoring(riskRows),
-    workers:      buildWorkers(resolvedReports),
+    metrics:       buildMetrics(reports, sevenDaysAgo, yesterday),
+    severity:      buildSeverity(reports),
+    issueTypes:    buildIssueTypes(reports),
+    trend:         buildTrend(reports),
+    statusSnap:    buildStatusSnapshot(reports),
+    riskPriority:  buildRiskPriority(riskRows),
+    riskScoring:   buildRiskScoring(riskRows),
+    workers:       buildWorkers(resolvedReports),
+    recentReports,
   };
 }
 
 export function useDashboardData() {
   const { data = EMPTY_STATE, isLoading: loading } = useQuery({
-    queryKey:           QUERY_KEYS.dashboard,
-    queryFn:            fetchDashboard,
-    staleTime:          60_000,
-    gcTime:             5 * 60_000,
+    queryKey:             QUERY_KEYS.dashboard,
+    queryFn:              fetchDashboard,
+    staleTime:            60_000,
+    gcTime:               5 * 60_000,
     refetchOnWindowFocus: false,
   });
 
