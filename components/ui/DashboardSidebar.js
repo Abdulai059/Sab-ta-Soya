@@ -26,6 +26,7 @@ import {
   Handshake,
   Users,
   X,
+  UserCircle,
 } from "lucide-react";
 
 // All nav items use type:"view" — rendered inside the shell, no page navigation
@@ -107,6 +108,19 @@ const NAV_GROUPS = [
         view: "operator",
         icon: Shield,
         permission: DASHBOARD.VIEW_OPERATOR_PANEL,
+        type: "view",
+      },
+    ],
+  },
+
+  {
+    title: "Account",
+    items: [
+      {
+        id: "profile",
+        label: "Profile",
+        view: "profile",
+        icon: UserCircle,
         type: "view",
       },
     ],

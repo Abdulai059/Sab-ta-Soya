@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useDashboardView } from "@/context/DashboardViewContext";
 import { useState } from "react";
 import {
   Droplets,
@@ -16,6 +17,7 @@ import {
   ChevronDown,
   UserCircle2,
   X,
+  User,
 } from "lucide-react";
 
 const ROLE_COLORS = {
@@ -41,6 +43,7 @@ const ROLE_COLORS = {
 
 export default function DashboardNavbar() {
   const { profile, signOut } = useAuth();
+  const { setView } = useDashboardView();
   const isAuthenticated = !!profile;
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -141,8 +144,18 @@ export default function DashboardNavbar() {
                   onClick={() => setProfileOpen((o) => !o)}
                   className="flex items-center gap-2 h-9 pl-2 pr-3 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 transition-colors"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0">
-                    <UserCircle2 className="w-4 h-4 text-white" />
+                  <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={profile.full_name || profile.email}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                        <UserCircle2 className="w-4 h-4 text-white" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-start leading-tight max-w-[120px]">
@@ -171,6 +184,17 @@ export default function DashboardNavbar() {
                         {profile.email}
                       </p>
                     </div>
+
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        setView("profile");
+                      }}
+                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      View Profile
+                    </button>
 
                     <button
                       onClick={() => {
@@ -231,8 +255,18 @@ export default function DashboardNavbar() {
               {isAuthenticated && (
                 <>
                   <div className="flex items-center gap-2 px-3 py-2">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0">
-                      <UserCircle2 className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0">
+                      {profile?.avatar_url ? (
+                        <img
+                          src={profile.avatar_url}
+                          alt={profile.full_name || profile.email}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                          <UserCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-stone-800 truncate">
@@ -245,6 +279,17 @@ export default function DashboardNavbar() {
                       </span>
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setView("profile");
+                    }}
+                    className="flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors"
+                  >
+                    <User className="w-4 h-4 shrink-0" />
+                    View Profile
+                  </button>
 
                   <button
                     onClick={() => {

@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { CardTitle } from "../admin/DashboardCard";
 
 const GRADE_SCALE = [
-  { label: "F",  color: "#b91c1c", range: [0,  60]  },
-  { label: "D",  color: "#dc2626", range: [60, 70]  },
-  { label: "C",  color: "#f97316", range: [70, 75]  },
-  { label: "B",  color: "#eab308", range: [75, 80]  },
-  { label: "A",  color: "#22c55e", range: [80, 90]  },
+  { label: "C",  color: "#b91c1c", range: [0,  60]  },
+  // { label: "H",  color: "#dc2626", range: [60, 70]  },
+  { label: "H",  color: "#f97316", range: [70, 75]  },
+  { label: "M",  color: "#eab308", range: [75, 80]  },
+  { label: "L",  color: "#22c55e", range: [80, 90]  },
   { label: "A+", color: "#3b82f6", range: [90, 100] },
+
 ];
 
 function getGradeForPct(pct) {
@@ -134,13 +136,14 @@ export default function SecurityDashboard({
   const pageTotal = pageData.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <div className=" p-4 font-['DM_Sans',sans-serif]">
+    <div className=" font-['DM_Sans',sans-serif]">
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');`}</style>
 
       <div className="max-w-full mx-auto flex flex-col gap-4">
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-          <h2 className="text-sm font-semibold text-gray-800 mb-0.5">Sanitation Health Score</h2>
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+           <CardTitle>Sanitation Health Score</CardTitle>
+
           <p className="text-xs text-gray-400 mb-5">
             Overall resolution rate — percentage of reported sanitation incidents that have been resolved
           </p>
@@ -175,10 +178,10 @@ export default function SecurityDashboard({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
             <div className="flex items-start justify-between mb-3">
               <div>
-                <h2 className="text-sm font-semibold text-gray-800">Reports by Issue Type</h2>
+                   <CardTitle>Reports by Issue Type</CardTitle> 
                 <p className="text-xs text-gray-400">
                   Distribution of reported sanitation incidents by category this month
                 </p>
@@ -245,9 +248,9 @@ export default function SecurityDashboard({
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
             <div className="mb-1">
-              <h2 className="text-sm font-semibold text-gray-800">Response Status Breakdown</h2>
+               <CardTitle>Response Status Breakdown</CardTitle> 
               <p className="text-xs text-gray-400">
                 Where every reported incident currently stands in the resolution pipeline
               </p>

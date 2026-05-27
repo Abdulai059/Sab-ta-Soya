@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CardTitle } from "./DashboardCard";
 
 function DonutChart({ segments }) {
   const r = 60, cx = 80, cy = 80, stroke = 28;
@@ -106,11 +107,12 @@ export default function RiskComplianceWidget({ data = {} }) {
   const centerLabel  = activeFilter?.label ?? "";
 
   return (
-    <div className="flex gap-4 p-0 bg-[#f4f5f7] min-h-screen font-['DM_Sans',sans-serif] items-start">
+    <div className="flex gap-4 p-0 font-['DM_Sans',sans-serif] items-start">
 
       <div className="bg-white rounded-2xl p-5 shadow-sm flex-1 min-w-[200px]">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-gray-800">Risk assessment breakdown</h2>
+           <CardTitle>Risk assessment breakdown</CardTitle>
+
           <button className="flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 rounded-lg px-2.5 py-1.5 hover:bg-gray-50">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
@@ -120,24 +122,24 @@ export default function RiskComplianceWidget({ data = {} }) {
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 pl-20">
           <div className="relative">
             <DonutChart segments={donut} />
             {donut.slice(0, 3).map((d, i) => {
               const pctLabel = Math.round((d.value / donutTotal) * 100) + "%";
               const pos = [
-                "absolute top-[22px] left-[5px]",
-                "absolute top-[22px] right-[2px]",
-                "absolute bottom-[22px] left-[2px]",
+                "absolute top-[22px] left-[-20px]",
+                "absolute top-[22px] right-[-20px]",
+                "absolute bottom-[24px] left-[-15px]",
               ][i];
               return (
-                <span key={i} className={`${pos} text-[10px] font-semibold text-gray-500`}>
+                <span key={i} className={`${pos} text-xs font-semibold text-gray-500`}>
                   {pctLabel}
                 </span>
               );
             })}
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 pl-15">
             {donut.map((s) => (
               <div key={s.label} className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
@@ -150,7 +152,8 @@ export default function RiskComplianceWidget({ data = {} }) {
 
       <div className="bg-white rounded-2xl p-5 shadow-sm flex-1 min-w-[220px]">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-800">resolution rate</h2>
+           <CardTitle>resolution rate</CardTitle>
+          
           <div className="flex gap-1">
             {GAUGE_FILTERS.map((f) => (
               <button
@@ -193,7 +196,7 @@ export default function RiskComplianceWidget({ data = {} }) {
       </div>
 
       <div className="bg-white rounded-2xl p-5 shadow-sm w-[240px] shrink-0">
-        <h2 className="text-sm font-semibold text-gray-800 mb-4">Recent Alerts</h2>
+         <CardTitle>Recent Alerts</CardTitle>
         <div className="flex flex-col gap-4">
           {alerts.length === 0 ? (
             <p className="text-xs text-gray-400 text-center py-4">No recent reports</p>

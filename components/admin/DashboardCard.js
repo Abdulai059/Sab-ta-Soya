@@ -8,7 +8,7 @@ export function Card({ children, className = "" }) {
 
 export function CardTitle({ children }) {
   return (
-    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+    <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-4">
       {children}
     </p>
   );

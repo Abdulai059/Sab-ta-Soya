@@ -22,6 +22,7 @@ const UserManagementPage = lazy(() => import("@/app/(dashboard)/admin/page"));
 const DistrictPage     = lazy(() => import("@/app/(dashboard)/district-officer/page"));
 const NgoPage          = lazy(() => import("@/app/(dashboard)/ngo/page"));
 const OperatorPage     = lazy(() => import("@/app/(dashboard)/operator/page"));
+const ProfilePage      = lazy(() => import("@/components/profile/ProfilePage"));
 
 const VIEW_COMPONENTS = {
   analytics:    AnalyticsPage,
@@ -33,6 +34,7 @@ const VIEW_COMPONENTS = {
   district:     DistrictPage,
   ngo:          NgoPage,
   operator:     OperatorPage,
+  profile:      ProfilePage,
 };
 
 const VIEW_LABELS = {
@@ -45,6 +47,7 @@ const VIEW_LABELS = {
   district:     "District Panel",
   ngo:          "NGO Portal",
   operator:     "Operator",
+  profile:      "Profile",
 };
 
 function getDefaultView(role) {

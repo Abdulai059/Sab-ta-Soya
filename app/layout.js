@@ -9,14 +9,14 @@ import { RealtimeProvider } from "@/components/providers/RealtimeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "SaniTrack - WASH Sanitation Tracking System",
+  title: "Sab'ta Soya - WASH Sanitation Tracking System",
   description:
     "Comprehensive sanitation incident tracking and management for Northern Ghana",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "SaniTrack",
+    title: "Sab'ta Soya",
   },
 };
 
@@ -33,10 +33,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <meta name="application-name" content="SaniTrack" />
+        <meta name="application-name" content="Sab'ta Soya" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SaniTrack" />
+        <meta name="apple-mobile-web-app-title" content="Sab'ta Soya" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#10b981" />
