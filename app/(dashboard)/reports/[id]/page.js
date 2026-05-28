@@ -13,6 +13,9 @@ import QuickActions from "@/components/reports/detail/QuickActions";
 import LocationImages from "@/components/reports/detail/LocationImages";
 import ReportDetailSkeleton from "@/components/reports/detail/ReportDetailSkeleton";
 import RiskAssessmentCard from "@/components/reports/detail/RiskAssessmentCard";
+import WorkerSelector from "@/components/assignment/WorkerSelector";
+import AssignmentHistory from "@/components/assignment/AssignmentHistory";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ReportDetailPage() {
   const { profile } = useAuth();
@@ -20,6 +23,7 @@ export default function ReportDetailPage() {
   const params = useParams();
   const dashCtx = useDashboardView();
   const isInDashboard = !!dashCtx?.goBack;
+  const queryClient = useQueryClient();
 
   const reportId = isInDashboard ? dashCtx.viewParams?.id : params?.id;
 
@@ -67,7 +71,23 @@ export default function ReportDetailPage() {
               <ReportInfo report={report} />
             </div>
 
+            {/* Assignment Section */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Assignment</h3>
+              <WorkerSelector
+                reportId={report.id}
+                currentAssignedTo={report.assigned_to}
+                onAssignSuccess={() => {
+                  // Refresh report data after successful assignment
+                  queryClient.invalidateQueries(['report', reportId]);
+                }}
+              />
+            </div>
+
             <WorkflowRoadmap report={report} statusHistory={statusHistory} />
+            
+            {/* Assignment History */}
+            <AssignmentHistory reportId={report.id} />
           </div>
 
           <div className="space-y-6">

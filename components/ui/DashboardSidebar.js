@@ -27,6 +27,7 @@ import {
   Users,
   X,
   UserCircle,
+  Briefcase,
 } from "lucide-react";
 
 // All nav items use type:"view" — rendered inside the shell, no page navigation
@@ -54,6 +55,14 @@ const NAV_GROUPS = [
         view: "reports",
         icon: ClipboardList,
         permission: REPORTS.VIEW_ALL,
+        type: "view",
+      },
+      {
+        id: "my-assignments",
+        label: "My Assignments",
+        view: "my-assignments",
+        icon: Briefcase,
+        permission: REPORTS.VIEW_ASSIGNED,
         type: "view",
       },
       {

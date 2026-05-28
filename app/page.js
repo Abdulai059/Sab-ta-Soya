@@ -6,10 +6,15 @@ import { useEffect } from "react";
 import ChainPage from "@/components/ui/ChainPage";
 import SecurityDashboard from "@/components/ui/Securitychart";
 
+// All authenticated users go to their role-specific dashboard
 const ROLE_ROUTES = {
-  admin:            "/admin",
-  district_officer: "/district-officer",
-  ngo:              "/ngo",
+  admin:              "/admin",
+  district_officer:   "/district-officer",
+  ngo:                "/ngo",
+  operator:           "/operator",
+  community_officer:  "/community-officer",
+  health_officer:     "/health-officer",
+  sanitation_worker:  "/operator", // Workers use operator dashboard
 };
 
 export default function HomePage() {
@@ -18,7 +23,9 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && mounted && user && profile) {
-      router.replace(ROLE_ROUTES[profile.role] ?? "/operator");
+      // Redirect authenticated users to their dashboard
+      const dashboardRoute = ROLE_ROUTES[profile.role] ?? "/operator";
+      router.replace(dashboardRoute);
     }
   }, [user, profile, loading, mounted, router]);
 
@@ -42,10 +49,10 @@ export default function HomePage() {
   }
 
   // Not logged in — show the public landing page
-  return (<div>
-    <ChainPage />
-    {/* <SecurityDashboard/> */}
+  return (
+    <div>
+      <ChainPage />
+      {/* <SecurityDashboard/> */}
     </div>
   );
-  
 }
