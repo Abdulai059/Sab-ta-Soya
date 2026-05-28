@@ -26,7 +26,7 @@ async function fetchReportDetail(reportId) {
   if (profileIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, full_name, phone, role")
+      .select("id, full_name, phone, role, avatar_url")
       .in("id", profileIds);
     profileMap = Object.fromEntries((profiles || []).map((p) => [p.id, p]));
   }

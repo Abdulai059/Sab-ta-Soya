@@ -11,12 +11,6 @@ import {
   XCircle,
 } from "lucide-react";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-/**
- * Full workflow: pending → assigned → in_progress → disposed → verified
- * pending is always the first stage — every report starts here.
- */
 const STAGES = [
   {
     id:          "pending",
@@ -50,7 +44,6 @@ const STAGES = [
   },
 ];
 
-// Maps status → index in STAGES array
 const STAGE_INDEX = {
   pending:     0,
   assigned:    1,
@@ -68,8 +61,6 @@ const STATUS_BADGE = {
   cancelled:   { label: "Cancelled",   cls: "bg-red-100 text-red-700" },
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function timeAgo(ts) {
   if (!ts) return null;
   const diff  = Date.now() - new Date(ts).getTime();
@@ -82,10 +73,6 @@ function timeAgo(ts) {
   return "just now";
 }
 
-/**
- * Builds { [status]: { ts, by } } from the status history array.
- * Keeps the most recent entry per status.
- */
 function buildTimestampMap(statusHistory) {
   const map = {};
   (statusHistory ?? []).forEach((entry) => {
@@ -101,8 +88,6 @@ function buildTimestampMap(statusHistory) {
   });
   return map;
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function StageNode({ stage, isCompleted, isActive, isLast, timestamp }) {
   const Icon = stage.icon;
@@ -124,7 +109,6 @@ function StageNode({ stage, isCompleted, isActive, isLast, timestamp }) {
 
   return (
     <div className="flex gap-4">
-      {/* Node + vertical connector */}
       <div className="flex flex-col items-center pt-1 shrink-0">
         <div className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${nodeStyle}`}>
           {isCompleted
@@ -139,7 +123,6 @@ function StageNode({ stage, isCompleted, isActive, isLast, timestamp }) {
         )}
       </div>
 
-      {/* Stage card */}
       <div className={`flex-1 ${!isLast ? "pb-4" : "pb-0"}`}>
         <div className={`px-4 py-3 rounded-xl border transition-all duration-300 ${cardStyle}`}>
           <div className="flex items-start justify-between gap-2">
@@ -209,12 +192,10 @@ function WorkerBadge({ worker }) {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
 export default function WorkflowRoadmap({ report, statusHistory }) {
   const rawStatus  = report?.status ?? "pending";
   const status     = rawStatus.toLowerCase();
-  const stageIndex = STAGE_INDEX[status] ?? 0;   // default to pending (0)
+  const stageIndex = STAGE_INDEX[status] ?? 0;
   const isCancelled = status === "cancelled";
   const isVerified  = status === "verified";
 
@@ -222,7 +203,6 @@ export default function WorkflowRoadmap({ report, statusHistory }) {
   const badge       = STATUS_BADGE[status] ?? STATUS_BADGE.pending;
   const tsMap       = buildTimestampMap(statusHistory);
 
-  // ── Cancelled — show a clear terminal state ────────────────────────────────
   if (isCancelled) {
     return (
       <div className="bg-white rounded-xl border border-red-100 shadow-sm overflow-hidden">
@@ -248,11 +228,9 @@ export default function WorkflowRoadmap({ report, statusHistory }) {
     );
   }
 
-  // ── Normal workflow (pending → verified) ───────────────────────────────────
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-      {/* Header */}
       <div className="p-5 border-b border-gray-100">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div>
@@ -268,7 +246,6 @@ export default function WorkflowRoadmap({ report, statusHistory }) {
           </span>
         </div>
 
-        {/* Progress bar */}
         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-700 ease-out ${
@@ -279,10 +256,8 @@ export default function WorkflowRoadmap({ report, statusHistory }) {
         </div>
       </div>
 
-      {/* Assigned worker — only shown once a worker exists */}
       <WorkerBadge worker={report?.worker ?? null} />
 
-      {/* Stage list */}
       <div className="p-5">
         {STAGES.map((stage, index) => (
           <StageNode
@@ -296,7 +271,6 @@ export default function WorkflowRoadmap({ report, statusHistory }) {
         ))}
       </div>
 
-      {/* Verified completion banner */}
       {isVerified && (
         <div className="mx-5 mb-5 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">

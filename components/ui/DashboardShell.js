@@ -14,37 +14,43 @@ import { ROLE_PERMISSIONS, DASHBOARD } from "@/lib/permissions";
 const lazy = (importFn) => dynamic(importFn, { ssr: false });
 
 const AnalyticsPage    = lazy(() => import("@/app/(dashboard)/admin/analytics/page"));
-const MapPage          = lazy(() => import("@/app/maps/page"));
-const ReportsPage      = lazy(() => import("@/app/reports/page"));
-const SubmitPage       = lazy(() => import("@/app/reporteissue/page"));
-const ReportDetail     = lazy(() => import("@/app/reports/[id]/page"));
+const MapPage          = lazy(() => import("@/app/(dashboard)/maps/page"));
+const ReportsPage      = lazy(() => import("@/app/(dashboard)/reports/page"));
+const SubmitPage       = lazy(() => import("@/app/(dashboard)/reporteissue/page"));
+const ReportDetail     = lazy(() => import("@/app/(dashboard)/reports/[id]/page"));
 const UserManagementPage = lazy(() => import("@/app/(dashboard)/admin/page"));
 const DistrictPage     = lazy(() => import("@/app/(dashboard)/district-officer/page"));
 const NgoPage          = lazy(() => import("@/app/(dashboard)/ngo/page"));
 const OperatorPage     = lazy(() => import("@/app/(dashboard)/operator/page"));
+const ProfilePage      = lazy(() => import("@/components/profile/ProfilePage"));
+const MyAssignmentsPage = lazy(() => import("@/app/(dashboard)/my-assignments/page"));
 
 const VIEW_COMPONENTS = {
-  analytics:    AnalyticsPage,
-  map:          MapPage,
-  reports:      ReportsPage,
-  submit:       SubmitPage,
-  reportDetail: ReportDetail,
-  users:        UserManagementPage,
-  district:     DistrictPage,
-  ngo:          NgoPage,
-  operator:     OperatorPage,
+  analytics:      AnalyticsPage,
+  map:            MapPage,
+  reports:        ReportsPage,
+  submit:         SubmitPage,
+  reportDetail:   ReportDetail,
+  users:          UserManagementPage,
+  district:       DistrictPage,
+  ngo:            NgoPage,
+  operator:       OperatorPage,
+  profile:        ProfilePage,
+  "my-assignments": MyAssignmentsPage,
 };
 
 const VIEW_LABELS = {
-  analytics:    "Analytics",
-  map:          "Live Map",
-  reports:      "Reports",
-  submit:       "Submit Issue",
-  reportDetail: "Report Detail",
-  users:        "User Management",
-  district:     "District Panel",
-  ngo:          "NGO Portal",
-  operator:     "Operator",
+  analytics:        "Analytics",
+  map:              "Live Map",
+  reports:          "Reports",
+  submit:           "Submit Issue",
+  reportDetail:     "Report Detail",
+  users:            "User Management",
+  district:         "District Panel",
+  ngo:              "NGO Portal",
+  operator:         "Operator",
+  profile:          "Profile",
+  "my-assignments": "My Assignments",
 };
 
 function getDefaultView(role) {

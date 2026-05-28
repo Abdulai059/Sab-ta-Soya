@@ -13,44 +13,52 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// constants 
+
+const MAX_SCORE = 130;
+
+const PRIORITY_CONFIG = {
+  critical: {
+    label: "Critical",
+    bar: "bg-red-500",
+    badge: "bg-red-100 text-red-700 border-red-200",
+    icon: "text-red-500",
+  },
+  high: {
+    label: "High",
+    bar: "bg-orange-500",
+    badge: "bg-orange-100 text-orange-700 border-orange-200",
+    icon: "text-orange-500",
+  },
+  medium: {
+    label: "Medium",
+    bar: "bg-yellow-500",
+    badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    icon: "text-yellow-500",
+  },
+  low: {
+    label: "Low",
+    bar: "bg-blue-400",
+    badge: "bg-blue-100 text-blue-700 border-blue-200",
+    icon: "text-blue-400",
+  },
+};
+
+const RISK_FACTORS = [
+  { key: "near_school",        icon: School,    label: "Near a school",              color: "text-indigo-500" },
+  { key: "near_water_source",  icon: Droplets,  label: "Near water source",          color: "text-blue-500"   },
+  { key: "flood_zone",         icon: Waves,     label: "Flood zone",                 color: "text-cyan-500"   },
+  { key: "drought_zone",       icon: Sun,       label: "Drought zone",               color: "text-amber-500"  },
+  { key: "repeated_incident",  icon: RefreshCw, label: "Repeated incident (30 days)",color: "text-orange-500" },
+];
+
+// helpers
 
 function getPriorityConfig(level) {
-  switch (level) {
-    case "critical":
-      return {
-        label: "Critical",
-        bar: "bg-red-500",
-        badge: "bg-red-100 text-red-700 border-red-200",
-        ring: "border-red-200",
-        icon: "text-red-500",
-      };
-    case "high":
-      return {
-        label: "High",
-        bar: "bg-orange-500",
-        badge: "bg-orange-100 text-orange-700 border-orange-200",
-        ring: "border-orange-200",
-        icon: "text-orange-500",
-      };
-    case "medium":
-      return {
-        label: "Medium",
-        bar: "bg-yellow-500",
-        badge: "bg-yellow-100 text-yellow-700 border-yellow-200",
-        ring: "border-yellow-200",
-        icon: "text-yellow-500",
-      };
-    default:
-      return {
-        label: "Low",
-        bar: "bg-blue-400",
-        badge: "bg-blue-100 text-blue-700 border-blue-200",
-        ring: "border-blue-200",
-        icon: "text-blue-400",
-      };
-  }
+  return PRIORITY_CONFIG[level] ?? PRIORITY_CONFIG.low;
 }
+
+// sub-components
 
 function RiskFactor({ icon: Icon, label, active, color = "text-emerald-600" }) {
   return (
@@ -72,7 +80,7 @@ function RiskFactor({ icon: Icon, label, active, color = "text-emerald-600" }) {
   );
 }
 
-// ── main component ────────────────────────────────────────────────────────────
+// main component 
 
 export default function RiskAssessmentCard({ risk }) {
   if (!risk) {
@@ -95,14 +103,13 @@ export default function RiskAssessmentCard({ risk }) {
     );
   }
 
-  const cfg      = getPriorityConfig(risk.priority_level);
-  const MAX_SCORE = 130;
-  const barWidth  = Math.round((Math.min(risk.risk_score, MAX_SCORE) / MAX_SCORE) * 100);
+  const cfg = getPriorityConfig(risk.priority_level);
+  const barWidth = Math.round((Math.min(risk.risk_score, MAX_SCORE) / MAX_SCORE) * 100);
 
   return (
-    <div className={`bg-white rounded-xl border shadow-sm overflow-hidden `}>
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ShieldAlert className={`w-5 h-5 ${cfg.icon}`} />
           <h2 className="text-base font-semibold text-gray-900">Risk Assessment</h2>
@@ -117,7 +124,9 @@ export default function RiskAssessmentCard({ risk }) {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-medium text-gray-500">Risk Score</span>
-            <span className="text-sm font-bold text-gray-900">{risk.risk_score} / {MAX_SCORE}</span>
+            <span className="text-sm font-bold text-gray-900">
+              {risk.risk_score} / {MAX_SCORE}
+            </span>
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <div
@@ -126,10 +135,9 @@ export default function RiskAssessmentCard({ risk }) {
             />
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-[10px] text-gray-400">Low</span>
-            <span className="text-[10px] text-gray-400">Medium</span>
-            <span className="text-[10px] text-gray-400">High</span>
-            <span className="text-[10px] text-gray-400">Critical</span>
+            {["Low", "Medium", "High", "Critical"].map((label) => (
+              <span key={label} className="text-[10px] text-gray-400">{label}</span>
+            ))}
           </div>
         </div>
 
@@ -138,7 +146,7 @@ export default function RiskAssessmentCard({ risk }) {
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 border border-red-200">
             <Bell className="w-4 h-4 text-red-500 shrink-0" />
             <p className="text-xs font-semibold text-red-700">
-              Escalation required immediate attention needed
+              Escalation required — immediate attention needed.
             </p>
           </div>
         )}
@@ -149,36 +157,15 @@ export default function RiskAssessmentCard({ risk }) {
             Risk Factors
           </p>
           <div className="grid grid-cols-1 gap-2">
-            <RiskFactor
-              icon={School}
-              label="Near a school"
-              active={risk.near_school}
-              color="text-indigo-500"
-            />
-            <RiskFactor
-              icon={Droplets}
-              label="Near water source"
-              active={risk.near_water_source}
-              color="text-blue-500"
-            />
-            <RiskFactor
-              icon={Waves}
-              label="Flood zone"
-              active={risk.flood_zone}
-              color="text-cyan-500"
-            />
-            <RiskFactor
-              icon={Sun}
-              label="Drought zone"
-              active={risk.drought_zone}
-              color="text-amber-500"
-            />
-            <RiskFactor
-              icon={RefreshCw}
-              label="Repeated incident (30 days)"
-              active={risk.repeated_incident}
-              color="text-orange-500"
-            />
+            {RISK_FACTORS.map(({ key, icon, label, color }) => (
+              <RiskFactor
+                key={key}
+                icon={icon}
+                label={label}
+                active={risk[key]}
+                color={color}
+              />
+            ))}
           </div>
         </div>
 
@@ -195,7 +182,7 @@ export default function RiskAssessmentCard({ risk }) {
           </div>
         )}
 
-        {/* Calculated at */}
+        {/* Assessed at */}
         <p className="text-[11px] text-gray-400 text-right">
           Assessed {new Date(risk.created_at).toLocaleString()}
         </p>

@@ -66,8 +66,18 @@ function WorkerCell({ worker, status }) {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0">
-        {worker.full_name?.charAt(0).toUpperCase() ?? "?"}
+      <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
+        {worker.avatar_url ? (
+          <img
+            src={worker.avatar_url}
+            alt={worker.full_name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
+            {worker.full_name?.charAt(0).toUpperCase() ?? "?"}
+          </div>
+        )}
       </div>
       <div className="min-w-0">
         <p className="text-xs font-medium text-gray-800 truncate">{worker.full_name}</p>

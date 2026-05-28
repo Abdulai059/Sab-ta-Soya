@@ -172,8 +172,18 @@ export default function PublicNavbar({ activeNav, onNavChange }) {
                   onClick={() => setProfileOpen((o) => !o)}
                   className="flex items-center gap-2 h-10 pl-2 pr-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition-colors"
                 >
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0">
-                    <UserCircle2 className="w-4 h-4 text-white" />
+                  <div className="w-6 h-6 rounded-lg overflow-hidden shrink-0">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={profile.full_name || profile.email}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                        <UserCircle2 className="w-4 h-4 text-white" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-start leading-tight max-w-[130px]">
@@ -293,8 +303,18 @@ export default function PublicNavbar({ activeNav, onNavChange }) {
               {isAuthenticated ? (
                 <>
                   <div className="flex items-center gap-2 px-3 py-2">
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shrink-0">
-                      <UserCircle2 className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0">
+                      {profile?.avatar_url ? (
+                        <img
+                          src={profile.avatar_url}
+                          alt={profile.full_name || profile.email}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                          <UserCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-stone-800 truncate">

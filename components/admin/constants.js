@@ -64,6 +64,14 @@ export const STATUS_CONFIG = [
     textColor: "#15803D",
     icon: "✅",
   },
+  {
+    label: "Cancelled",
+    keys: ["cancelled"],
+    color: "#EF4444",
+    bg: "#FEF2F2",
+    textColor: "#991B1B",
+    icon: "❌",
+  },
 ];
 
 export const TOOLTIP_STYLE = {

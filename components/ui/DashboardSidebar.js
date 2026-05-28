@@ -26,9 +26,10 @@ import {
   Handshake,
   Users,
   X,
+  UserCircle,
+  Briefcase,
 } from "lucide-react";
 
-// All nav items use type:"view" — rendered inside the shell, no page navigation
 const NAV_GROUPS = [
   {
     title: "Overview",
@@ -43,7 +44,6 @@ const NAV_GROUPS = [
       },
     ],
   },
-
   {
     title: "Operations",
     items: [
@@ -53,6 +53,14 @@ const NAV_GROUPS = [
         view: "reports",
         icon: ClipboardList,
         permission: REPORTS.VIEW_ALL,
+        type: "view",
+      },
+      {
+        id: "my-assignments",
+        label: "My Assignments",
+        view: "my-assignments",
+        icon: Briefcase,
+        permission: REPORTS.VIEW_ASSIGNED,
         type: "view",
       },
       {
@@ -73,7 +81,6 @@ const NAV_GROUPS = [
       },
     ],
   },
-
   {
     title: "Administration",
     items: [
@@ -111,6 +118,18 @@ const NAV_GROUPS = [
       },
     ],
   },
+  {
+    title: "Account",
+    items: [
+      {
+        id: "profile",
+        label: "Profile",
+        view: "profile",
+        icon: UserCircle,
+        type: "view",
+      },
+    ],
+  },
 ];
 
 export default function DashboardSidebar({ open, onClose }) {
@@ -137,26 +156,21 @@ export default function DashboardSidebar({ open, onClose }) {
     <aside
       className={`
         fixed left-0 top-16 bottom-0
-        w-64 bg-white border-r border-gray-100
+        w-60 bg-white border-r border-gray-100
         flex flex-col z-40 overflow-y-auto
         transition-transform duration-300 ease-in-out
         ${open ? "translate-x-0 shadow-xl" : "-translate-x-full"}
         lg:translate-x-0 lg:shadow-none
       `}
     >
-      {/* MOBILE CLOSE */}
       <div className="lg:hidden flex justify-end p-3">
         <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition">
           <X className="w-4 h-4 text-gray-500" />
         </button>
       </div>
 
-    
-
-      {/* NAV */}
       <nav className="flex-1 px-3 py-4 space-y-6">
         {authLoading || !profile ? (
-          // Skeleton nav items while auth loads
           <div className="space-y-1 animate-pulse">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
@@ -184,12 +198,12 @@ export default function DashboardSidebar({ open, onClose }) {
                         px-3 py-2.5 rounded-xl text-sm font-medium
                         transition-all duration-150
                         ${isActive
-                          ? "bg-emerald-50 text-emerald-700 shadow-sm"
+                          ? "bg-brand-highlight text-gray-900 shadow-sm"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         }
                       `}
                     >
-                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"}`} />
+                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-gray-800" : "text-gray-400  group-hover:text-gray-600"}`} />
                       <span className="flex-1 text-left truncate">{item.label}</span>
                     </button>
                   );
@@ -200,7 +214,6 @@ export default function DashboardSidebar({ open, onClose }) {
         )}
       </nav>
 
-      {/* SIGN OUT */}
       <div className="border-t border-gray-100 p-3">
         <button
           onClick={signOut}

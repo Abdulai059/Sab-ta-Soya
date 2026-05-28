@@ -269,6 +269,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    if (!user?.id) return null;
+    return await fetchProfile(user.id);
+  };
+
   const value = {
     user,
     profile,
@@ -277,6 +282,7 @@ export const AuthProvider = ({ children }) => {
     signUp,
     signIn,
     signOut,
+    refreshProfile,
     isAdmin: profile?.role === "admin",
     isDistrictOfficer: profile?.role === "district_officer",
     isCommunityOfficer: profile?.role === "community_officer",

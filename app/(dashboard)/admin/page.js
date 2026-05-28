@@ -1,19 +1,11 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Users, LayoutDashboard } from "lucide-react";
+import { Users } from "lucide-react";
 import { useUserManagement } from "@/components/admin/useUserManagement";
 import UserTable from "@/components/admin/UserTable";
 import UserMobileList from "@/components/admin/UserMobileList";
 
-
-
 export default function AdminPanel() {
-  const pathname = usePathname();
-
   const {
     users,
     loading,
@@ -22,22 +14,16 @@ export default function AdminPanel() {
     handleRoleChange,
   } = useUserManagement();
 
-  /* -----------------------------
-     PERMISSION CHECK
-  ------------------------------*/
   if (!canViewUsers) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-gray-500 text-sm">
-          You don’t have permission to access this page.
+          You don't have permission to access this page.
         </p>
       </div>
     );
   }
 
-  /* -----------------------------
-     LOADING STATE
-  ------------------------------*/
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -49,18 +35,9 @@ export default function AdminPanel() {
     );
   }
 
-  const isActive = (href) =>
-    href === "/admin" ? pathname === "/admin" : pathname === href || pathname?.startsWith(href + "/");
-
-  /* -----------------------------
-     UI
-  ------------------------------*/
   return (
     <div className="space-y-6">
-
-      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
             User Management
@@ -70,7 +47,6 @@ export default function AdminPanel() {
           </p>
         </div>
 
-        {/* USER COUNT CARD */}
         <div className="flex items-center gap-3 bg-brand-primary border border-gray-200 rounded-xl px-4 py-2 shadow-sm w-fit">
           <Users className="w-4 h-4 text-gray-500" />
           <div className="text-right">
@@ -84,9 +60,6 @@ export default function AdminPanel() {
         </div>
       </div>
 
-
-
-      {/* CONTENT */}
       <div className="space-y-6">
         <UserTable
           users={users}

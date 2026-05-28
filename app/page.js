@@ -2,18 +2,18 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, Suspense } from "react";
-import dynamic from "next/dynamic";
-import Topbar from "@/components/ui/PublicNavbar";
+import { useEffect } from "react";
+import ChainPage from "@/components/ui/ChainPage";
 
-const MapsPage = dynamic(() => import("./maps/page"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex-1 flex items-center justify-center bg-stone-50 text-emerald-500 font-mono text-xs tracking-widest animate-pulse">
-      LOADING MAP...
-    </div>
-  ),
-});
+const ROLE_ROUTES = {
+  admin:              "/admin",
+  district_officer:   "/district-officer",
+  ngo:                "/ngo",
+  operator:           "/operator",
+  community_officer:  "/community-officer",
+  health_officer:     "/health-officer",
+  sanitation_worker:  "/operator",
+};
 
 export default function HomePage() {
   const { user, profile, loading, mounted } = useAuth();
@@ -21,28 +21,26 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && mounted && user && profile) {
-      const roleRoutes = {
-        admin: "/admin",
-        district_officer: "/district-officer",
-        ngo: "/ngo",
-      };
-      const destination = roleRoutes[profile.role] ?? "/operator";
-      if (destination) router.push(destination);
+      const dashboardRoute = ROLE_ROUTES[profile.role] ?? "/operator";
+      router.replace(dashboardRoute);
     }
   }, [user, profile, loading, mounted, router]);
 
+  if (!mounted || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-9 h-9 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
+      </div>
+    );
+  }
 
+  if (user && profile) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-9 h-9 rounded-full border-2 border-stone-200 border-t-emerald-500 animate-spin" />
+      </div>
+    );
+  }
 
-  if (user && profile) return null;
-
-  return (
-    <div className="h-screen flex flex-col bg-[#f3f4f6] overflow-hidden">
-      <Topbar />
-      <main className="flex-1 min-h-0 pt-4">
-        <div className="h-full">
-          <MapsPage />
-        </div>
-      </main>
-    </div>
-  );
+  return <ChainPage />;
 }
