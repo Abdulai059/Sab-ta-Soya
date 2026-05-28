@@ -26,8 +26,8 @@ export default function StatsCard({ value, label, color = "gray", icon: Icon }) 
 
       <div className="flex items-start justify-between mb-4">
         <p className="text-sm text-gray-500 font-medium leading-tight max-w-[70%]">{label}</p>
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconBg} ${iconText}`}>
-          <DisplayIcon size={18} />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${iconBg} ${iconText}`}>
+          <DisplayIcon size={16} />
         </div>
       </div>
 

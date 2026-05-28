@@ -52,7 +52,7 @@ async function fetchReports() {
     assignedIds.length > 0
       ? supabase
           .from("profiles")
-          .select("id, full_name, role")
+          .select("id, full_name, role, avatar_url")
           .in("id", assignedIds)
       : Promise.resolve({ data: [], error: null }),
   ]);

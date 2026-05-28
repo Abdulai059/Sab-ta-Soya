@@ -4,9 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import ChainPage from "@/components/ui/ChainPage";
-import SecurityDashboard from "@/components/ui/Securitychart";
 
-// All authenticated users go to their role-specific dashboard
 const ROLE_ROUTES = {
   admin:              "/admin",
   district_officer:   "/district-officer",
@@ -14,7 +12,7 @@ const ROLE_ROUTES = {
   operator:           "/operator",
   community_officer:  "/community-officer",
   health_officer:     "/health-officer",
-  sanitation_worker:  "/operator", // Workers use operator dashboard
+  sanitation_worker:  "/operator",
 };
 
 export default function HomePage() {
@@ -23,14 +21,11 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && mounted && user && profile) {
-      // Redirect authenticated users to their dashboard
       const dashboardRoute = ROLE_ROUTES[profile.role] ?? "/operator";
       router.replace(dashboardRoute);
     }
   }, [user, profile, loading, mounted, router]);
 
-  // While auth is resolving (initial load / refresh) show a minimal spinner
-  // so there's no flash of the wrong content
   if (!mounted || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -39,7 +34,6 @@ export default function HomePage() {
     );
   }
 
-  // Logged-in user — show spinner while router.replace() is in flight
   if (user && profile) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -48,11 +42,5 @@ export default function HomePage() {
     );
   }
 
-  // Not logged in — show the public landing page
-  return (
-    <div>
-      <ChainPage />
-      {/* <SecurityDashboard/> */}
-    </div>
-  );
+  return <ChainPage />;
 }

@@ -4,11 +4,7 @@ import { useState } from "react";
 import { ShieldCheck, ClipboardList, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { useDashboardData } from "@/components/admin/useDashboardData";
 import MetricCard from "@/components/admin/MetricCard";
-import TrendChart from "@/components/admin/TrendChart";
-import RiskAssessmentChart from "@/components/admin/RiskAssessmentChart";
 import RiskScoringChart from "@/components/admin/RiskScoringChart";
-import IssueTypesChart from "@/components/admin/IssueTypesChart";
-import StatusSnapshot from "@/components/admin/StatusSnapshot";
 import ViewCasesModal from "@/components/admin/ViewCasesModal";
 import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
 import SecurityDashboard from "@/components/ui/Securitychart";
@@ -32,7 +28,6 @@ export default function AuthorityDashboard() {
   const {
     metrics,
     issueTypes,
-    trend,
     statusSnap,
     riskPriority,
     riskScoring,
@@ -118,44 +113,44 @@ export default function AuthorityDashboard() {
         </div>
       </div>
 
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-  <MetricCard
-    icon={ClipboardList}
-    iconBg="#dbeafe"
-    iconColor="#2563eb"
-    label="Total reports"
-    value={metrics.total}
-    delta={`+${metrics.totalInLastWeek} this week`}
-    deltaUp={false}
-  />
-  <MetricCard
-    icon={AlertTriangle}
-    iconBg="#fee2e2"
-    iconColor="#ef4444"
-    label="Open incidents"
-    value={metrics.open}
-    delta={`+${metrics.openSinceYesterday} since yesterday`}
-    deltaUp={true}
-  />
-  <MetricCard
-    icon={CheckCircle}
-    iconBg="#dcfce7"
-    iconColor="#16a34a"
-    label="Resolved"
-    value={metrics.resolved}
-    delta={`+${metrics.resolvedInLastWeek} this week`}
-    deltaUp={false}
-  />
-  <MetricCard
-    icon={Clock}
-    iconBg="#fef9c3"
-    iconColor="#ca8a04"
-    label="Avg response"
-    value={`${metrics.avgResponseHours}h`}
-    delta="↓ improving"
-    deltaUp={false}
-  />
-</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <MetricCard
+          icon={ClipboardList}
+          iconBg="#dbeafe"
+          iconColor="#2563eb"
+          label="Total reports"
+          value={metrics.total}
+          delta={`+${metrics.totalInLastWeek} this week`}
+          deltaUp={false}
+        />
+        <MetricCard
+          icon={AlertTriangle}
+          iconBg="#fee2e2"
+          iconColor="#ef4444"
+          label="Open incidents"
+          value={metrics.open}
+          delta={`+${metrics.openSinceYesterday} since yesterday`}
+          deltaUp={true}
+        />
+        <MetricCard
+          icon={CheckCircle}
+          iconBg="#dcfce7"
+          iconColor="#16a34a"
+          label="Resolved"
+          value={metrics.resolved}
+          delta={`+${metrics.resolvedInLastWeek} this week`}
+          deltaUp={false}
+        />
+        <MetricCard
+          icon={Clock}
+          iconBg="#fef9c3"
+          iconColor="#ca8a04"
+          label="Avg response"
+          value={`${metrics.avgResponseHours}h`}
+          delta="↓ improving"
+          deltaUp={false}
+        />
+      </div>
 
       <SecurityDashboard
         scorePct={scorePct}
@@ -170,17 +165,6 @@ export default function AuthorityDashboard() {
       />
 
       <RiskComplianceWidget data={widgetData} />
-
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TrendChart trend={trend} />
-        <RiskAssessmentChart
-          riskPriority={riskPriority}
-          resolved={metrics.resolved}
-          total={metrics.total}
-        />
-      </div> */}
-
-   
 
       <RiskScoringChart riskScoring={riskScoring} />
 

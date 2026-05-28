@@ -15,6 +15,7 @@ import ReportDetailSkeleton from "@/components/reports/detail/ReportDetailSkelet
 import RiskAssessmentCard from "@/components/reports/detail/RiskAssessmentCard";
 import WorkerSelector from "@/components/assignment/WorkerSelector";
 import AssignmentHistory from "@/components/assignment/AssignmentHistory";
+import VerifyWorkButton from "@/components/reports/detail/VerifyWorkButton";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function ReportDetailPage() {
@@ -85,6 +86,16 @@ export default function ReportDetailPage() {
             </div>
 
             <WorkflowRoadmap report={report} statusHistory={statusHistory} />
+            
+            {/* Verify Work Button */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Work Verification</h3>
+              <VerifyWorkButton
+                reportId={report.id}
+                reportStatus={report.status}
+                userId={profile?.id}
+              />
+            </div>
             
             {/* Assignment History */}
             <AssignmentHistory reportId={report.id} />

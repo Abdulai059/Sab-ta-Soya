@@ -11,7 +11,7 @@ export function useWorkerList() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, role, email, phone, organization')
+        .select('id, full_name, role, email, phone, organization, avatar_url')
         .eq('role', 'sanitation_worker')
         .order('full_name', { ascending: true });
       

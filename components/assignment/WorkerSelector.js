@@ -122,11 +122,30 @@ export default function WorkerSelector({ reportId, currentAssignedTo, onAssignSu
                       disabled={isAssigning}
                       className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-b border-gray-100 last:border-b-0"
                     >
-                      <div className="font-medium text-gray-900">{worker.full_name}</div>
-                      <div className="text-sm text-gray-500">{worker.email}</div>
-                      {worker.organization && (
-                        <div className="text-xs text-gray-400 mt-1">{worker.organization}</div>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+                          {worker.avatar_url ? (
+                            <img
+                              src={worker.avatar_url}
+                              alt={worker.full_name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">
+                                {worker.full_name?.charAt(0).toUpperCase() ?? "?"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900">{worker.full_name}</div>
+                          <div className="text-sm text-gray-500">{worker.email}</div>
+                          {worker.organization && (
+                            <div className="text-xs text-gray-400 mt-1">{worker.organization}</div>
+                          )}
+                        </div>
+                      </div>
                     </button>
                   ))
                 ) : (
@@ -205,11 +224,30 @@ export default function WorkerSelector({ reportId, currentAssignedTo, onAssignSu
                     className="w-full px-4 py-4 text-left hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-b border-gray-100"
                     style={{ minHeight: '44px' }}
                   >
-                    <div className="font-medium text-gray-900">{worker.full_name}</div>
-                    <div className="text-sm text-gray-500 mt-1">{worker.email}</div>
-                    {worker.organization && (
-                      <div className="text-xs text-gray-400 mt-1">{worker.organization}</div>
-                    )}
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        {worker.avatar_url ? (
+                          <img
+                            src={worker.avatar_url}
+                            alt={worker.full_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">
+                              {worker.full_name?.charAt(0).toUpperCase() ?? "?"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900">{worker.full_name}</div>
+                        <div className="text-sm text-gray-500 mt-1">{worker.email}</div>
+                        {worker.organization && (
+                          <div className="text-xs text-gray-400 mt-1">{worker.organization}</div>
+                        )}
+                      </div>
+                    </div>
                   </button>
                 ))
               ) : (

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin, AlertTriangle, Clock, Inbox, Wifi, WifiOff, Check, X } from "lucide-react";
+import { MapPin, AlertTriangle, Clock, Inbox, Wifi, WifiOff, Check, X, History as HistoryIcon, Play, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { useHasPermission } from "@/hooks/usePermissions";
@@ -10,13 +10,14 @@ import { REPORTS } from "@/lib/permissions";
 import { formatTimeAgo } from "@/utils/assignmentFormatters";
 import { useAcceptAssignment } from "@/hooks/useAcceptAssignment";
 import { useDeclineAssignment } from "@/hooks/useDeclineAssignment";
+import { useStartWork } from "@/hooks/useStartWork";
+import { useCompleteWork } from "@/hooks/useCompleteWork";
 import { useDashboardView } from "@/context/DashboardViewContext";
+import { useAssignmentHistory } from "@/hooks/useAssignmentHistory";
+import { calculateAssignmentStats } from "@/utils/assignmentStats";
+import HistoryFilters from "@/components/assignment/HistoryFilters";
+import HistoryCard from "@/components/assignment/HistoryCard";
 
-/**
- * MyAssignments Page
- * Dedicated page for sanitation workers to view their assigned reports
- * Shows pending assignments (requiring accept/decline) and accepted assignments
- */
 export default function MyAssignmentsPage() {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
@@ -24,12 +25,15 @@ export default function MyAssignmentsPage() {
   const [connectionStatus, setConnectionStatus] = useState('connected');
   const [decliningReportId, setDecliningReportId] = useState(null);
   const [declineReason, setDeclineReason] = useState('');
+  const [historyFilter, setHistoryFilter] = useState('all');
+  const [historySortOrder, setHistorySortOrder] = useState('newest');
   const { setView } = useDashboardView();
   
   const acceptMutation = useAcceptAssignment();
   const declineMutation = useDeclineAssignment();
+  const startWorkMutation = useStartWork();
+  const completeWorkMutation = useCompleteWork();
   
-  // Fetch assignments with assignment status
   const { data: assignments = [], isLoading } = useQuery({
     queryKey: ['my-assignments', profile?.id],
     queryFn: async () => {
@@ -60,15 +64,34 @@ export default function MyAssignmentsPage() {
     enabled: canViewAssigned && !!profile?.id
   });
   
-  // Separate pending and accepted assignments
+  const { data: history = [], isLoading: historyLoading } = useAssignmentHistory(profile?.id);
+  
   const pendingAssignments = assignments.filter(
     report => report.assignment?.[0]?.status === 'pending'
   );
-  const acceptedAssignments = assignments.filter(
-    report => report.assignment?.[0]?.status === 'accepted'
+  const assignedAssignments = assignments.filter(
+    report => report.assignment?.[0]?.status === 'accepted' && report.status === 'assigned'
+  );
+  const inProgressAssignments = assignments.filter(
+    report => report.assignment?.[0]?.status === 'accepted' && report.status === 'in_progress'
   );
   
-  // Handle accept assignment
+  const stats = useMemo(() => calculateAssignmentStats(history), [history]);
+  
+  const filteredHistory = useMemo(() => {
+    let filtered = history;
+    
+    if (historyFilter !== 'all') {
+      filtered = history.filter(a => a.status === historyFilter);
+    }
+    
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.completed_at || a.rejected_at || a.expired_at);
+      const dateB = new Date(b.completed_at || b.rejected_at || b.expired_at);
+      return historySortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+  }, [history, historyFilter, historySortOrder]);
+  
   const handleAccept = (reportId) => {
     acceptMutation.mutate({
       reportId,
@@ -76,7 +99,6 @@ export default function MyAssignmentsPage() {
     });
   };
   
-  // Handle decline assignment
   const handleDecline = (reportId) => {
     declineMutation.mutate({
       reportId,
@@ -90,7 +112,20 @@ export default function MyAssignmentsPage() {
     });
   };
   
-  // Real-time subscription
+  const handleStartWork = (reportId) => {
+    startWorkMutation.mutate({
+      reportId,
+      workerId: profile.id
+    });
+  };
+  
+  const handleCompleteWork = (reportId) => {
+    completeWorkMutation.mutate({
+      reportId,
+      workerId: profile.id
+    });
+  };
+  
   useEffect(() => {
     if (!profile?.id || !canViewAssigned) return;
     
@@ -103,14 +138,16 @@ export default function MyAssignmentsPage() {
         filter: `assigned_to=eq.${profile.id}`
       }, () => {
         queryClient.invalidateQueries(['my-assignments', profile.id]);
+        queryClient.invalidateQueries(['assignment-history', profile.id]);
       })
       .on('postgres_changes', {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
         table: 'report_assignments',
         filter: `worker_id=eq.${profile.id}`
       }, () => {
         queryClient.invalidateQueries(['my-assignments', profile.id]);
+        queryClient.invalidateQueries(['assignment-history', profile.id]);
       })
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
@@ -127,7 +164,6 @@ export default function MyAssignmentsPage() {
     };
   }, [profile?.id, canViewAssigned, queryClient]);
   
-  // Permission check
   if (!canViewAssigned) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -143,7 +179,6 @@ export default function MyAssignmentsPage() {
     );
   }
   
-  // Get severity badge color
   const getSeverityColor = (severity) => {
     const colors = {
       low: 'bg-blue-100 text-blue-700',
@@ -154,7 +189,6 @@ export default function MyAssignmentsPage() {
     return colors[severity?.toLowerCase()] || 'bg-gray-100 text-gray-700';
   };
   
-  // Get status badge color
   const getStatusColor = (status) => {
     const colors = {
       pending: 'bg-gray-100 text-gray-700',
@@ -167,13 +201,11 @@ export default function MyAssignmentsPage() {
     return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-700';
   };
   
-  // Render assignment card
-  const renderAssignmentCard = (report, isPending = false) => (
+  const renderAssignmentCard = (report, type = 'pending') => (
     <div
       key={report.id}
       className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
     >
-      {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <span className="text-xs font-medium text-gray-500">
           {report.reference_id}
@@ -183,14 +215,11 @@ export default function MyAssignmentsPage() {
         </span>
       </div>
       
-      {/* Issue Type */}
       <h3 className="font-medium text-gray-900 mb-3">
         {report.issue_type}
       </h3>
       
-      {/* Details */}
       <div className="space-y-2 text-sm text-gray-600 mb-4">
-        {/* Location */}
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">
@@ -198,7 +227,6 @@ export default function MyAssignmentsPage() {
           </span>
         </div>
         
-        {/* Severity */}
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 flex-shrink-0" />
           <span className={`text-xs font-medium px-2 py-0.5 rounded ${getSeverityColor(report.severity)}`}>
@@ -206,15 +234,13 @@ export default function MyAssignmentsPage() {
           </span>
         </div>
         
-        {/* Time */}
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 flex-shrink-0" />
           <span>{formatTimeAgo(report.created_at)}</span>
         </div>
       </div>
       
-      {/* Action Buttons for Pending Assignments */}
-      {isPending && (
+      {type === 'pending' && (
         <div className="space-y-2">
           {decliningReportId === report.id ? (
             <div className="space-y-2">
@@ -266,14 +292,42 @@ export default function MyAssignmentsPage() {
         </div>
       )}
       
-      {/* View Details Link for Accepted Assignments */}
-      {!isPending && (
-        <button
-          onClick={() => setView("reportDetail", { id: report.id })}
-          className="block w-full text-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-        >
-          View Details
-        </button>
+      {type === 'assigned' && (
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleStartWork(report.id)}
+            disabled={startWorkMutation.isPending}
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Play className="w-4 h-4" />
+            {startWorkMutation.isPending ? 'Starting...' : 'Start Work'}
+          </button>
+          <button
+            onClick={() => setView("reportDetail", { id: report.id })}
+            className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
+          >
+            View
+          </button>
+        </div>
+      )}
+      
+      {type === 'in_progress' && (
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleCompleteWork(report.id)}
+            disabled={completeWorkMutation.isPending}
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            {completeWorkMutation.isPending ? 'Completing...' : 'Mark Complete'}
+          </button>
+          <button
+            onClick={() => setView("reportDetail", { id: report.id })}
+            className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
+          >
+            View
+          </button>
+        </div>
       )}
     </div>
   );
@@ -282,7 +336,6 @@ export default function MyAssignmentsPage() {
     <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto py-6 space-y-6">
         
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">My Assignments</h1>
@@ -291,28 +344,34 @@ export default function MyAssignmentsPage() {
             </p>
           </div>
           
-          {/* Assignment Count */}
           <div className="flex items-center gap-3">
             <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
-              <p className="text-xs text-gray-500 leading-none">
-                Pending
-              </p>
+              <p className="text-xs text-gray-500 leading-none">Pending</p>
               <p className="text-2xl font-semibold text-orange-600">
                 {pendingAssignments.length}
               </p>
             </div>
             <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
-              <p className="text-xs text-gray-500 leading-none">
-                Accepted
+              <p className="text-xs text-gray-500 leading-none">Assigned</p>
+              <p className="text-2xl font-semibold text-blue-600">
+                {assignedAssignments.length}
               </p>
-              <p className="text-2xl font-semibold text-green-600">
-                {acceptedAssignments.length}
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
+              <p className="text-xs text-gray-500 leading-none">Active</p>
+              <p className="text-2xl font-semibold text-purple-600">
+                {inProgressAssignments.length}
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
+              <p className="text-xs text-gray-500 leading-none">History</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {stats.total}
               </p>
             </div>
           </div>
         </div>
         
-        {/* Connection Status */}
         {connectionStatus !== 'connected' && (
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
             <div className="flex items-center gap-2">
@@ -326,7 +385,6 @@ export default function MyAssignmentsPage() {
           </div>
         )}
         
-        {/* Loading State */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map(i => (
@@ -341,9 +399,8 @@ export default function MyAssignmentsPage() {
               </div>
             ))}
           </div>
-        ) : assignments.length > 0 ? (
+        ) : (
           <div className="space-y-8">
-            {/* Pending Assignments Section */}
             {pendingAssignments.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
@@ -355,35 +412,110 @@ export default function MyAssignmentsPage() {
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {pendingAssignments.map(report => renderAssignmentCard(report, true))}
+                  {pendingAssignments.map(report => renderAssignmentCard(report, 'pending'))}
                 </div>
               </div>
             )}
             
-            {/* Accepted Assignments Section */}
-            {acceptedAssignments.length > 0 && (
+            {assignedAssignments.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Accepted Assignments
-                </h2>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Assigned (Ready to Start)
+                  </h2>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+                    {assignedAssignments.length}
+                  </span>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {acceptedAssignments.map(report => renderAssignmentCard(report, false))}
+                  {assignedAssignments.map(report => renderAssignmentCard(report, 'assigned'))}
                 </div>
               </div>
             )}
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-            <Inbox className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No assignments yet
-            </h3>
-            <p className="text-sm text-gray-500">
-              You'll see reports here when they're assigned to you
-            </p>
+            
+            {inProgressAssignments.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    In Progress (Active Work)
+                  </h2>
+                  <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                    {inProgressAssignments.length}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {inProgressAssignments.map(report => renderAssignmentCard(report, 'in_progress'))}
+                </div>
+              </div>
+            )}
+            
+            {assignments.length === 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
+                <Inbox className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No assignments yet
+                </h3>
+                <p className="text-sm text-gray-500">
+                  You'll see reports here when they're assigned to you
+                </p>
+              </div>
+            )}
           </div>
         )}
+        
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <HistoryIcon className="w-5 h-5 text-gray-700" />
+            <h2 className="text-lg font-semibold text-gray-900">
+              Assignment History
+            </h2>
+            {stats.completionRate > 0 && (
+              <span className="text-sm text-gray-500">
+                ({stats.completionRate}% completion rate)
+              </span>
+            )}
+          </div>
+          
+          {historyLoading ? (
+            <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+              <div className="animate-spin w-8 h-8 border-4 border-gray-200 border-t-emerald-600 rounded-full mx-auto"></div>
+              <p className="text-sm text-gray-500 mt-4">Loading history...</p>
+            </div>
+          ) : history.length > 0 ? (
+            <div className="space-y-4">
+              <HistoryFilters
+                activeFilter={historyFilter}
+                onFilterChange={setHistoryFilter}
+                sortOrder={historySortOrder}
+                onSortChange={setHistorySortOrder}
+              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredHistory.map(assignment => (
+                  <HistoryCard key={assignment.id} assignment={assignment} />
+                ))}
+              </div>
+              
+              {filteredHistory.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                  <p className="text-sm text-gray-500">
+                    No {historyFilter !== 'all' ? historyFilter : ''} assignments found
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+              <HistoryIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No history yet
+              </h3>
+              <p className="text-sm text-gray-500">
+                Completed and declined assignments will appear here
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
