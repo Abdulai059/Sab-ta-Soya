@@ -198,7 +198,7 @@ export default function DashboardSidebar({ open, onClose }) {
                         px-3 py-2.5 rounded-xl text-sm font-medium
                         transition-all duration-150
                         ${isActive
-                          ? "bg-brand-highlight text-gray-900 shadow-sm"
+                          ? "bg-brand-primary text-gray-900 shadow-sm"
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         }
                       `}
