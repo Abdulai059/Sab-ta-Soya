@@ -2,8 +2,18 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import ChainPage from "@/components/ui/ChainPage";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import PublicNavbar from "@/components/ui/PublicNavbar";
+
+const MapsPage = dynamic(() => import("./(dashboard)/maps/page"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center bg-stone-50 text-emerald-500 font-mono text-xs tracking-widest animate-pulse">
+      LOADING MAP...
+    </div>
+  ),
+});
 
 const ROLE_ROUTES = {
   admin:              "/admin",
@@ -18,6 +28,7 @@ const ROLE_ROUTES = {
 export default function HomePage() {
   const { user, profile, loading, mounted } = useAuth();
   const router = useRouter();
+  const [activeNav, setActiveNav] = useState("map");
 
   useEffect(() => {
     if (!loading && mounted && user && profile) {
@@ -42,5 +53,13 @@ export default function HomePage() {
     );
   }
 
-  return <ChainPage />;
+  return (
+    <div className="h-screen flex flex-col overflow-hidden">
+      <PublicNavbar activeNav={activeNav} onNavChange={setActiveNav} />
+     
+      <div className="mt-2 w-[1500px] mx-auto min-h-0" style={{ height: "calc(100vh - 4rem)" }}>
+        <MapsPage />
+      </div>
+    </div>
+  );
 }
