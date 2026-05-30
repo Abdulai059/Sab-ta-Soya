@@ -30,7 +30,7 @@ export default function DashboardShell({ children }) {
         />
 
         <main className="flex-1 lg:ml-64 min-h-0 flex flex-col ">
-          <div className="lg:hidden shrink-0 flex items-center gap-3 px-4 py-3  border-b border-gray-100 shadow-sm z-20">
+          <div className="lg:hidden shrink-0 flex items-center gap-3 px-4 py-3 border-b border-gray-100 shadow-sm z-20">
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
@@ -41,7 +41,7 @@ export default function DashboardShell({ children }) {
           </div>
 
           {isMap ? (
-            <div className="flex-1 h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden">
               {children}
             </div>
           ) : (
