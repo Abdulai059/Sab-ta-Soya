@@ -1,9 +1,12 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useReportDetail } from "@/hooks/useReportDetail";
+import { useDashboardView } from "@/context/DashboardViewContext";
 import ReportHeader from "@/components/reports/detail/ReportHeader";
 import ReportInfo from "@/components/reports/detail/ReportInfo";
 import WorkflowRoadmap from "@/components/reports/detail/WorkflowRoadmap";
@@ -18,25 +21,28 @@ import VerifyWorkButton from "@/components/reports/detail/VerifyWorkButton";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function ReportDetailPage() {
-  const { profile } = useAuth();
-  const router = useRouter();
-  const params = useParams();
+  const { profile }   = useAuth();
+  const router        = useRouter();
+  const params        = useParams();
+  const dashCtx       = useDashboardView();
+  const isInDashboard = !!dashCtx?.goBack;
   const queryClient = useQueryClient();
 
-  const reportId = params?.id;
+  const reportId = isInDashboard ? dashCtx.viewParams?.id : params?.id;
 
   const { report, statusHistory, locationImages, riskAssessment, loading } =
     useReportDetail(reportId);
 
   const handleBack = () => {
-    router.push("/reports");
+    if (isInDashboard) dashCtx.goBack();
+    else router.push("/reports");
   };
 
   if (loading) return <ReportDetailSkeleton />;
 
   if (!report) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Report not found</h2>
           <button onClick={handleBack} className="text-emerald-600 hover:text-emerald-700">
@@ -48,7 +54,7 @@ export default function ReportDetailPage() {
   }
 
   return (
-    <div className="min-h-screen pt-0">
+    <div className="min-h-screen bg-gray-50 pt-0">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={handleBack}
@@ -65,12 +71,14 @@ export default function ReportDetailPage() {
               <ReportInfo report={report} />
             </div>
 
+            {/* Assignment Section */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Assignment</h3>
               <WorkerSelector
                 reportId={report.id}
                 currentAssignedTo={report.assigned_to}
                 onAssignSuccess={() => {
+                  // Refresh report data after successful assignment
                   queryClient.invalidateQueries(['report', reportId]);
                 }}
               />
@@ -78,6 +86,7 @@ export default function ReportDetailPage() {
 
             <WorkflowRoadmap report={report} statusHistory={statusHistory} />
             
+            {/* Verify Work Button */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Work Verification</h3>
               <VerifyWorkButton
@@ -87,6 +96,7 @@ export default function ReportDetailPage() {
               />
             </div>
             
+            {/* Assignment History */}
             <AssignmentHistory reportId={report.id} />
           </div>
 

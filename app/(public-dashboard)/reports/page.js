@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { Clock, CheckCircle, AlertTriangle, List } from "lucide-react";
 
 import { useAuth }              from "@/context/AuthContext";
@@ -27,8 +29,8 @@ const FILTERS = [
 const ITEMS_PER_PAGE = 5;
 
 export default function ReportsPage() {
-  const { profile }                   = useAuth();
-  const { reports, loading }          = useReports();
+  const { profile }          = useAuth();
+  const { reports, loading } = useReports();
 
   const {
     filteredReports,

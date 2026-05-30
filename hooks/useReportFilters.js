@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 
-// New workflow: pending → assigned → in_progress → disposed → verified
 const DONE_STATUSES = ["disposed", "verified"];
 
 export function useReportFilters(reports) {

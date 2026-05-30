@@ -1,4 +1,3 @@
-// New workflow: pending → assigned → in_progress → disposed → verified
 export function calculateReportStats(reports) {
   const total      = reports.length;
   const pending    = reports.filter((r) => r.status === "pending").length;
