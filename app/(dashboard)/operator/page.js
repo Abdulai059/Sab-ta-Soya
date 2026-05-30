@@ -1,45 +1,22 @@
-import ProtectedRoute from "@/components/ui/ProtectedRoute";
-
 export default function OperatorPage() {
+  const stats = [
+    { label: "Incident Reports", value: "24", color: "text-blue-600", sub: "This month" },
+    { label: "Pending Actions",  value: "8",  color: "text-yellow-600", sub: "Require attention" },
+    { label: "Resolved Today",   value: "12", color: "text-green-600",  sub: "Successfully completed" },
+  ];
+
   return (
-    <ProtectedRoute allowedRoles={["admin", "operator"]}>
-      <div className="px-4 py-6 sm:px-0">
-        <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Operator Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Welcome to the Operator dashboard. Here you can manage sanitation
-            incidents and reports.
-          </p>
-
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Incident Reports
-              </h3>
-              <p className="text-3xl font-bold text-blue-600">24</p>
-              <p className="text-sm text-gray-500">This month</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Pending Actions
-              </h3>
-              <p className="text-3xl font-bold text-yellow-600">8</p>
-              <p className="text-sm text-gray-500">Require attention</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Resolved Today
-              </h3>
-              <p className="text-3xl font-bold text-green-600">12</p>
-              <p className="text-sm text-gray-500">Successfully completed</p>
-            </div>
+    <div>
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Operator Dashboard</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stats.map(s => (
+          <div key={s.label} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p className="text-sm font-semibold text-gray-500 mb-2">{s.label}</p>
+            <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-xs text-gray-400 mt-1">{s.sub}</p>
           </div>
-        </div>
+        ))}
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

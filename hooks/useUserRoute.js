@@ -53,6 +53,7 @@ export function useUserRoute(userId, isTracking, latestPosition = null) {
 
     const newCoord = [latitude, longitude];
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPosition(latestPosition);
     setUserRoute((prev) => {
       // Avoid duplicate consecutive points
@@ -65,6 +66,7 @@ export function useUserRoute(userId, isTracking, latestPosition = null) {
   }, [latestPosition, isTracking]);
 
   // ── Lifecycle: load history on start, clear on stop ────────────────────
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!userId || !isTracking) {
       setUserRoute([]);

@@ -2,37 +2,41 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
+import LayoutWrapper from "@/components/ui/LayoutWrapper";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { RealtimeProvider } from "@/components/providers/RealtimeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "SaniTrack - WASH Sanitation Tracking System",
+  title: "Sab'ta Soya - WASH Sanitation Tracking System",
   description:
     "Comprehensive sanitation incident tracking and management for Northern Ghana",
   manifest: "/manifest.json",
-  themeColor: "#10b981",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "SaniTrack",
+    title: "Sab'ta Soya",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
-  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#10b981",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <meta name="application-name" content="SaniTrack" />
+        <meta name="application-name" content="Sab'ta Soya" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SaniTrack" />
+        <meta name="apple-mobile-web-app-title" content="Sab'ta Soya" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#10b981" />
@@ -47,8 +51,22 @@ export default function RootLayout({ children }) {
       </head>
       <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
-          <Toaster position="top-right" />
-          {children}
+          <QueryProvider>
+            <RealtimeProvider>
+              <Toaster 
+                position="top-right"
+                toastOptions={{
+                  style: { zIndex: 99999 },
+                  className: '',
+                  duration: 4000,
+                }}
+                containerStyle={{ zIndex: 99999 }}
+              />
+              <LayoutWrapper>
+                {children}
+              </LayoutWrapper>
+            </RealtimeProvider>
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

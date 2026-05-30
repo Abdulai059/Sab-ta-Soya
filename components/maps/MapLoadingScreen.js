@@ -15,15 +15,15 @@ export default function MapLoadingScreen() {
       <div className="relative flex flex-col items-center gap-6 animate-scale-in">
         <div className="relative flex items-center justify-center w-20 h-20">
           <span
-            className="absolute inset-0 rounded-full border border-emerald-400/30"
+            className="absolute inset-0 rounded-sm "
             style={{ animation: "radarPulse 2s ease-out infinite" }}
           />
           <span
-            className="absolute inset-2 rounded-full border border-emerald-400/20"
+            className="absolute inset-2 rounded-sm"
             style={{ animation: "radarPulse 2s ease-out 0.4s infinite" }}
           />
 
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+          <div className="w-14 h-14 rounded-sm bg-brand-primary flex items-center justify-center shadow-lg shadow-emerald-500/25">
             <svg
               className="w-7 h-7 text-white"
               fill="none"
@@ -51,7 +51,7 @@ export default function MapLoadingScreen() {
           style={{ animationDelay: "100ms" }}
         >
           <h1 className="text-xl font-bold tracking-tight text-stone-900">
-            Sani<span className="text-emerald-600">Track</span>
+            Sab'ta<span className="text-emerald-600">Soya</span>
           </h1>
           <p className="font-mono text-[11px] tracking-[0.2em] text-stone-400 uppercase mt-0.5">
             Sanitation GIS
@@ -63,7 +63,7 @@ export default function MapLoadingScreen() {
           style={{ animationDelay: "200ms" }}
         >
           <div
-            className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full"
+            className="h-full bg-brand-primary rounded-sm text-gray-950"
             style={{
               animation: "shimmer 1.6s ease-in-out infinite",
               backgroundSize: "200% 100%",

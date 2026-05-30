@@ -1,0 +1,178 @@
+"use client";
+
+import { useState } from "react";
+import { ShieldCheck, ClipboardList, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { useDashboardData } from "@/components/admin/useDashboardData";
+import { STATUS_CONFIG } from "@/components/admin/constants";
+import MetricCard from "@/components/admin/MetricCard";
+import RiskScoringChart from "@/components/admin/RiskScoringChart";
+import ViewCasesModal from "@/components/admin/ViewCasesModal";
+import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
+import SecurityDashboard from "@/components/ui/Securitychart";
+import RiskComplianceWidget from "@/components/admin/RiskComplianceWidget";
+
+const ASSET_COLORS = [
+  "#1e293b", "#334155", "#475569", "#64748b",
+  "#94a3b8", "#0f766e", "#0369a1", "#7c3aed",
+  "#b45309", "#be123c", "#15803d", "#c2410c",
+];
+
+
+export default function AuthorityDashboard() {
+  const {
+    metrics,
+    issueTypes,
+    statusSnap,
+    riskPriority,
+    riskScoring,
+    recentReports = [],
+    loading,
+    windowDays,
+  } = useDashboardData();
+
+  const [selectedWorker, setSelectedWorker] = useState(null);
+
+  if (loading) return <DashboardSkeleton />;
+
+  const getSnapCount = (key) =>
+    statusSnap.find((s) =>
+      s.keys?.some((k) => k.toLowerCase() === key.toLowerCase())
+    )?.count ?? 0;
+
+  const scorePct = metrics.total > 0
+    ? Math.round((metrics.resolved / metrics.total) * 100)
+    : 0;
+
+  const assessmentAvgPct = Math.round(
+    (metrics.resolvedInLastWeek / Math.max(metrics.totalInLastWeek, 1)) * 100
+  );
+
+  const assetData = issueTypes.map((t, i) => ({
+    name:  t.type,
+    value: t.count,
+    color: ASSET_COLORS[i % ASSET_COLORS.length],
+  }));
+
+  const weeklyPct = metrics.total > 0
+    ? Math.round((metrics.totalInLastWeek / metrics.total) * 100)
+    : 0;
+
+  const sprsData = STATUS_CONFIG.map((s) => ({
+    name:  s.label,
+    value: getSnapCount(s.keys[0]),
+    color: s.color,
+  }));
+
+  const widgetData = {
+    date: new Date().toLocaleDateString(),
+    donut: riskPriority.map((r) => ({
+      label: r.name,
+      value: r.value,
+      color: r.color,
+    })),
+    gauge: {
+      total:        getSnapCount("verified") + getSnapCount("disposed"),
+      compliant:    getSnapCount("verified"),
+      pending:      getSnapCount("disposed"),
+      nonCompliant: getSnapCount("cancelled"),
+    },
+    alerts: recentReports.map((r) => ({
+      id:      r.id,
+      icon:    r.severity === "critical" ? "triangle" : "clock",
+      company: r.issue_type ?? "Unknown issue",
+      level:   r.severity  ?? "low",
+      note:    r.reference_id ?? new Date(r.created_at).toLocaleDateString(),
+    })),
+  };
+
+  return (
+    <div className="space-y-5 max-w-[1500px] mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 text-emerald-500" />
+            <h1 className="text-lg font-semibold text-gray-800">Sab&apos;ta Soya</h1>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 font-medium">
+              Authority
+            </span>
+          </div>
+          <p className="text-sm text-gray-400 mt-0.5 ml-8">
+            Northern Ghana sanitation intelligence
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Live
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <MetricCard
+          icon={ClipboardList}
+          iconBg="#dbeafe"
+          iconColor="#2563eb"
+          label="Total reports"
+          value={metrics.total}
+          delta={`+${metrics.totalInLastWeek} this week`}
+          deltaUp={false}
+          subtitle={`Last ${windowDays} days`}
+        />
+        <MetricCard
+          icon={AlertTriangle}
+          iconBg="#fee2e2"
+          iconColor="#ef4444"
+          label="Open incidents"
+          value={metrics.open}
+          delta={`+${metrics.openSinceYesterday} since yesterday`}
+          deltaUp={true}
+          subtitle={`Last ${windowDays} days`}
+        />
+        <MetricCard
+          icon={CheckCircle}
+          iconBg="#dcfce7"
+          iconColor="#16a34a"
+          label="Resolved"
+          value={metrics.resolved}
+          delta={`+${metrics.resolvedInLastWeek} this week`}
+          deltaUp={false}
+        />
+        <MetricCard
+          icon={Clock}
+          iconBg="#fef9c3"
+          iconColor="#ca8a04"
+          label="Avg response"
+          value={`${metrics.avgResponseHours}h`}
+          delta="↓ improving"
+          deltaUp={false}
+        />
+      </div>
+
+      <SecurityDashboard
+        scorePct={scorePct}
+        assessmentAvgPct={assessmentAvgPct}
+        weekDelta={metrics.totalInLastWeek}
+        openCritical={metrics.open}
+        assetData={assetData}
+        totalReports={metrics.total}
+        weeklyPct={weeklyPct}
+        sprsData={sprsData}
+        openCount={metrics.open}
+      />
+
+      <RiskComplianceWidget data={widgetData} />
+
+      <RiskScoringChart riskScoring={riskScoring} />
+
+      <p className="text-center text-xs text-gray-300 pb-4">
+        Sab&apos;ta Soya · UNICEF StartUp Lab 2026 · Northern Ghana
+      </p>
+
+      {selectedWorker && (
+        <ViewCasesModal
+          worker={selectedWorker}
+          onClose={() => setSelectedWorker(null)}
+        />
+      )}
+    </div>
+  );
+}

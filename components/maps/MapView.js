@@ -9,6 +9,7 @@ import {
   Polyline,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useRef, useState, useEffect } from "react";
 import LayerControls from "./LayerControls";
 import {
   infraIcon,
@@ -40,10 +41,21 @@ export default function MapView({
   navigationDestination,
 }) {
   const mounted = useMapMounted();
+  const containerRef = useRef(null);
+  const [containerReady, setContainerReady] = useState(false);
 
-  if (!mounted) {
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerReady(true);
+    }
+  }, [mounted]);
+
+  if (!mounted || !containerReady) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-stone-50 font-mono text-xs text-emerald-600 animate-pulse">
+      <div
+        ref={containerRef}
+        className="flex-1 flex items-center justify-center bg-stone-50 font-mono text-xs text-emerald-600 animate-pulse"
+      >
         LOADING MAP...
       </div>
     );

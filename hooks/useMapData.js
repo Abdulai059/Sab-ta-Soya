@@ -1,4 +1,7 @@
+"use client";
+
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchLocations,
   fetchRecentIncidents,
@@ -7,56 +10,56 @@ import {
 } from "@/lib/mapService";
 import { fetchFieldWorkers } from "@/lib/trackingService";
 import { FALLBACK_LOCATION } from "@/lib/mapConstants";
+import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
 
-/**
- * Custom hook to manage all map data fetching
- * @returns {Object} Map data and loading state
- */
-export function useMapData() {
-  const [locations, setLocations] = useState([]);
-  const [communities, setCommunities] = useState([]);
-  const [geofences, setGeofences] = useState([]);
-  const [recentIncidents, setRecentIncidents] = useState([]);
-  const [fieldWorkers, setFieldWorkers] = useState([]);
-  const [activeLocation, setActiveLocation] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadMapData() {
-      setLoading(true);
-
-      const [locs, incidents, comms, fences, workers] = await Promise.all([
-        fetchLocations(),
-        fetchRecentIncidents(),
-        fetchCommunities(),
-        fetchGeofences(),
-        fetchFieldWorkers(),
-      ]);
-
-      const finalLocs = locs.length > 0 ? locs : [FALLBACK_LOCATION];
-      setLocations(finalLocs);
-      setRecentIncidents(incidents);
-      setCommunities(comms);
-      setGeofences(fences);
-      setFieldWorkers(workers);
-      setActiveLocation(finalLocs[0]);
-      setLoading(false);
-    }
-
-    loadMapData();
-  }, []);
+async function fetchMapData() {
+  const [locs, incidents, comms, fences, workers] = await Promise.all([
+    fetchLocations(),
+    fetchRecentIncidents(),
+    fetchCommunities(),
+    fetchGeofences(),
+    fetchFieldWorkers(),
+  ]);
 
   return {
-    locations,
-    setLocations,
-    communities,
-    geofences,
-    recentIncidents,
-    setRecentIncidents,
-    fieldWorkers,
-    setFieldWorkers,
+    locations:       locs.length > 0 ? locs : [FALLBACK_LOCATION],
+    recentIncidents: incidents,
+    communities:     comms,
+    geofences:       fences,
+    fieldWorkers:    workers,
+  };
+}
+
+export function useMapData() {
+  const qc = useQueryClient();
+
+  // Active location is pure UI state — not server data, stays local
+  const [activeLocation, setActiveLocation] = useState(null);
+
+  const { data, isLoading: loading } = useQuery({
+    queryKey: QUERY_KEYS.mapData,
+    queryFn: fetchMapData,
+  });
+
+  // Set the first location as active once data loads (replaces removed onSuccess)
+  useEffect(() => {
+    if (data?.locations?.length && activeLocation === null) {
+      setActiveLocation(data.locations[0]);
+    }
+  }, [data, activeLocation]);
+
+  return {
+    locations:       data?.locations       ?? [FALLBACK_LOCATION],
+    communities:     data?.communities     ?? [],
+    geofences:       data?.geofences       ?? [],
+    recentIncidents: data?.recentIncidents ?? [],
+    fieldWorkers:    data?.fieldWorkers    ?? [],
     activeLocation,
     setActiveLocation,
     loading,
+    // Expose setters for components that still need to update slices directly
+    setLocations:       () => qc.invalidateQueries({ queryKey: QUERY_KEYS.mapData }),
+    setRecentIncidents: () => qc.invalidateQueries({ queryKey: QUERY_KEYS.mapData }),
+    setFieldWorkers:    () => qc.invalidateQueries({ queryKey: QUERY_KEYS.mapData }),
   };
 }
