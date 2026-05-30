@@ -30,7 +30,7 @@ import MobileIncidentsOverlay from "@/components/maps/MobileIncidentsOverlay";
 import MobileWorkersOverlay from "@/components/maps/MobileWorkersOverlay";
 import WorkersFab from "@/components/maps/WorkersFab";
 
-// Leaflet must be client-only
+// Leaflet must be client-only.
 const MapView = nextDynamic(() => import("@/components/maps/MapView"), {
   ssr: false,
   loading: () => (
