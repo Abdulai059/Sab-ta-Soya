@@ -12,6 +12,7 @@ export default function ReportsTable({ reports, profile, formatTimeAgo }) {
     <div className="bg-white rounded-sm border border-gray-200 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
+
           <thead className="bg-brand-light-green border-b border-gray-200">
             <tr>
               {COLUMNS.map((col) => (
@@ -29,10 +30,16 @@ export default function ReportsTable({ reports, profile, formatTimeAgo }) {
               </tr>
             ) : (
               reports.map((report) => (
-                <ReportTableRow key={report.id} report={report} profile={profile} formatTimeAgo={formatTimeAgo} />
+                <ReportTableRow
+                  key={report.id}
+                  report={report}
+                  profile={profile}
+                  formatTimeAgo={formatTimeAgo}
+                />
               ))
             )}
           </tbody>
+
         </table>
       </div>
     </div>

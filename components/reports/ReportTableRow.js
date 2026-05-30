@@ -1,6 +1,5 @@
 import { Eye, Lock, MapPin, User, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 import { navigateTo } from "@/utils/navigateTo";
 
 const SEVERITY_STYLES = {
@@ -101,6 +100,7 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
 
   return (
     <tr className="border-b border-gray-300 hover:bg-gray-50/60 transition-colors">
+
       <td className={`${CELL} whitespace-nowrap`}>
         <span className="text-emerald-600 font-mono text-xs font-semibold tracking-wide">
           {report.reference_id}
@@ -177,6 +177,7 @@ export default function ReportTableRow({ report, profile, formatTimeAgo }) {
           )}
         </div>
       </td>
+
     </tr>
   );
 }

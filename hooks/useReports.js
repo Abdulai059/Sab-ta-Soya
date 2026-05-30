@@ -5,10 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
 import toast from "react-hot-toast";
 
-// ─── Data fetching ────────────────────────────────────────────────────────────
-
 async function fetchReports() {
-  // Step 1 — core reports (no joins that can silently fail)
   const { data: reports, error } = await supabase
     .from("sanitation_reports")
     .select(
@@ -29,7 +26,7 @@ async function fetchReports() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[useReports] reports query error:", error.message);
+    console.error("[useReports] query error:", error.message);
     toast.error("Failed to load reports");
     throw error;
   }
@@ -39,7 +36,6 @@ async function fetchReports() {
   const reportIds   = reports.map((r) => r.id);
   const assignedIds = [...new Set(reports.map((r) => r.assigned_to).filter(Boolean))];
 
-  // Step 2 — fetch risk assessments + worker profiles in parallel
   const [
     { data: riskRows,  error: riskError },
     { data: profiles,  error: profilesError },
@@ -57,22 +53,18 @@ async function fetchReports() {
       : Promise.resolve({ data: [], error: null }),
   ]);
 
-  if (riskError)    console.warn("[useReports] risk_assessments error:", riskError.message);
+  if (riskError)     console.warn("[useReports] risk_assessments error:", riskError.message);
   if (profilesError) console.warn("[useReports] profiles error:", profilesError.message);
 
-  // Step 3 — build lookup maps
   const riskMap   = Object.fromEntries((riskRows  ?? []).map((r) => [r.report_id, r]));
   const workerMap = Object.fromEntries((profiles  ?? []).map((p) => [p.id, p]));
 
-  // Step 4 — merge everything onto each report
   return reports.map((report) => ({
     ...report,
-    risk:   riskMap[report.id]                                        ?? null,
+    risk:   riskMap[report.id]                                           ?? null,
     worker: report.assigned_to ? (workerMap[report.assigned_to] ?? null) : null,
   }));
 }
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useReports() {
   const qc = useQueryClient();
