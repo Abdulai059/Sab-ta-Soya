@@ -121,7 +121,6 @@ export default function PublicNavbar({ activeNav, onNavChange }) {
                   </>
                 );
 
-                // MAP = BUTTON (NO ROUTE)
                 if (isMap) {
                   return (
                     <button
@@ -134,7 +133,6 @@ export default function PublicNavbar({ activeNav, onNavChange }) {
                   );
                 }
 
-                // OTHERS = LINKS
                 return (
                   <Link
                     key={id}

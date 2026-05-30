@@ -1,7 +1,7 @@
 import { MapPin, Clock, CheckCircle, XCircle, AlertCircle, Calendar } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { formatTimeAgo } from "@/utils/assignmentFormatters";
 import { calculateDuration } from "@/utils/assignmentStats";
-import { useDashboardView } from "@/context/DashboardViewContext";
 
 const STATUS_CONFIG = {
   completed: {
@@ -29,7 +29,7 @@ const SEVERITY_COLORS = {
 };
 
 export default function HistoryCard({ assignment }) {
-  const { setView } = useDashboardView();
+  const router = useRouter();
   const report = assignment.report;
   const config = STATUS_CONFIG[assignment.status];
   const Icon = config.icon;
@@ -37,7 +37,7 @@ export default function HistoryCard({ assignment }) {
 
   const handleViewDetails = () => {
     if (assignment.status === 'completed') {
-      setView("reportDetail", { id: report.id });
+      router.push(`/reports/${report.id}`);
     }
   };
 

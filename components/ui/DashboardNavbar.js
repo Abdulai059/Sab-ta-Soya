@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useDashboardView } from "@/context/DashboardViewContext";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Droplets,
@@ -34,16 +34,9 @@ const ROLE_COLORS = {
   supervisor: "bg-cyan-100 text-cyan-700",
 };
 
-// const DASHBOARD_NAV_ITEMS = [
-//   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: null },
-//   { id: "reports", label: "Reports", icon: FileText, href: null },
-//   { id: "map", label: "Map", icon: MapIcon, href: null },
-//   { id: "settings", label: "Settings", icon: Settings, href: null },
-// ];
-
 export default function DashboardNavbar() {
   const { profile, signOut } = useAuth();
-  const { setView } = useDashboardView();
+  const router = useRouter();
   const isAuthenticated = !!profile;
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -51,7 +44,6 @@ export default function DashboardNavbar() {
 
   const roleColor = ROLE_COLORS[profile?.role] ?? "bg-stone-100 text-stone-600";
 
-  // Get dashboard home based on role
   const getDashboardHome = () => {
     const role = profile?.role;
     if (role === "admin") return "/admin";
@@ -89,36 +81,6 @@ export default function DashboardNavbar() {
             </Link>
 
             <div className="hidden lg:block w-px h-7 bg-stone-200" />
-
-            {/* <nav className="hidden md:flex gap-2 items-center gap-1">
-              {DASHBOARD_NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-                const active = activeNav === id;
-
-                const baseClass =
-                  "relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200";
-
-                const stateClass = active
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "text-stone-500 hover:bg-stone-100 hover:text-stone-900";
-
-                const className = `${baseClass} ${stateClass}`;
-
-                return (
-                  <button
-                    key={id}
-                    onClick={() => onNavChange?.(id)}
-                    className={className}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{label}</span>
-
-                    {active && (
-                      <span className="absolute inset-x-2 -bottom-[7px] h-[2px] rounded-full bg-emerald-500" />
-                    )}
-                  </button>
-                );
-              })}
-            </nav> */}
           </div>
 
           <div className="flex items-center gap-2">
@@ -188,7 +150,7 @@ export default function DashboardNavbar() {
                     <button
                       onClick={() => {
                         setProfileOpen(false);
-                        setView("profile");
+                        router.push("/profile");
                       }}
                       className="flex items-center gap-2 w-full px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 transition-colors"
                     >
@@ -226,31 +188,6 @@ export default function DashboardNavbar() {
 
         {mobileOpen && (
           <div className="md:hidden border-t border-stone-200 bg-white px-4 py-3 flex flex-col gap-1">
-            {/* {DASHBOARD_NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-              const active = activeNav === id;
-              const commonClass = `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-              }`;
-              const handleClick = () => {
-                onNavChange?.(id);
-                setMobileOpen(false);
-              };
-              const content = (
-                <>
-                  <Icon className="w-4 h-4 shrink-0" />
-                  {label}
-                </>
-              );
-
-              return (
-                <button key={id} onClick={handleClick} className={commonClass}>
-                  {content}
-                </button>
-              );
-            })} */}
-
             <div className="border-t border-stone-100 mt-2 pt-2">
               {isAuthenticated && (
                 <>
@@ -283,7 +220,7 @@ export default function DashboardNavbar() {
                   <button
                     onClick={() => {
                       setMobileOpen(false);
-                      setView("profile");
+                      router.push("/profile");
                     }}
                     className="flex items-center gap-3 w-full rounded-lg px-3 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors"
                   >

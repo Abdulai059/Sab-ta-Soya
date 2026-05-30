@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import PublicNavbar from "@/components/ui/PublicNavbar";
 
-const MapsPage = dynamic(() => import("./(dashboard)/maps/page"), {
+const MapsPage = dynamic(() => import("./(public-dashboard)/maps/page"), {
   ssr: false,
   loading: () => (
     <div className="flex-1 flex items-center justify-center bg-stone-50 text-emerald-500 font-mono text-xs tracking-widest animate-pulse">

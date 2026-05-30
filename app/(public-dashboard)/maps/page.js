@@ -5,30 +5,25 @@ import { useEffect, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-// Custom Hooks
 import { useMapData } from "@/hooks/useMapData";
 import { useRealtimeSubscriptions } from "@/hooks/useRealtimeSubscriptions";
 import { useGPSTracking } from "@/hooks/useGPSTracking";
 import { useMapsUI } from "@/hooks/useMapsUI";
 import { useUserRoute } from "@/hooks/useUserRoute";
 
-// Layout Components
 import MapHeader from "@/components/maps/MapHeader";
 import MapFooter from "@/components/maps/MapFooter";
 import MapLoadingScreen from "@/components/maps/MapLoadingScreen";
 import MapRightPanel from "@/components/maps/MapRightPanel";
 
-// Desktop Components
 import LocationSlugs from "@/components/maps/LocationSlugs";
 
-// Mobile Components
 import MobileControls from "@/components/maps/MobileControls";
 import MobileLocationsOverlay from "@/components/maps/MobileLocationsOverlay";
 import MobileIncidentsOverlay from "@/components/maps/MobileIncidentsOverlay";
 import MobileWorkersOverlay from "@/components/maps/MobileWorkersOverlay";
 import WorkersFab from "@/components/maps/WorkersFab";
 
-// Leaflet must be client-only
 const MapView = dynamic(() => import("@/components/maps/MapView"), {
   ssr: false,
   loading: () => (
@@ -38,10 +33,6 @@ const MapView = dynamic(() => import("@/components/maps/MapView"), {
   ),
 });
 
-/**
- * Reads ?lat=&lng=&name= from the URL and flies the map to that location.
- * Must be wrapped in <Suspense> because useSearchParams() opts out of SSR.
- */
 function DeepLinkHandler({ setActiveLocation }) {
   const searchParams = useSearchParams();
 
@@ -89,7 +80,6 @@ export default function MapsPage() {
     handleStopTracking,
   } = useGPSTracking(profile);
 
-  // User route tracking (blue path like Google Maps)
   const { userRoute, currentPosition } = useUserRoute(
     profile?.id,
     isTracking,
@@ -152,7 +142,6 @@ export default function MapsPage() {
     setNavigationRoute([]);
   };
 
-  // Update navigation route as user moves
   useEffect(() => {
     if (navigationDestination && currentPosition) {
       setNavigationRoute([
@@ -166,7 +155,6 @@ export default function MapsPage() {
 
   return (
     <div className="flex flex-col h-full w-full bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
-      {/* Deep-link handler — reads ?lat=&lng=&name= from URL */}
       <Suspense fallback={null}>
         <DeepLinkHandler setActiveLocation={setActiveLocation} />
       </Suspense>

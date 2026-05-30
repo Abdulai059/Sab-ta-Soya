@@ -4,7 +4,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-import { useDashboardView } from "@/context/DashboardViewContext";
 import toast from "react-hot-toast";
 import {
   MapPin, AlertTriangle, Camera, User, Leaf, AlertCircle,
@@ -126,7 +125,6 @@ function Divider() {
   return <hr className="border-gray-100 my-5" />;
 }
 
-// ─── Geo Section ─────────────────────────────────────────────────────────────
 function GeoSection({ geoData, setGeoData }) {
   const [state, setState] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -242,7 +240,6 @@ function GeoSection({ geoData, setGeoData }) {
   );
 }
 
-// ─── Camera Section ───────────────────────────────────────────────────────────
 function CameraSection({ photos, setPhotos }) {
   const [camState, setCamState] = useState("idle");
   const [camError, setCamError] = useState("");
@@ -390,42 +387,35 @@ function CameraSection({ photos, setPhotos }) {
   );
 }
 
-// ─── Main Form ────────────────────────────────────────────────────────────────
 export default function ReportForm() {
   const router = useRouter();
   const { profile } = useAuth();
-  const dashCtx = useDashboardView();
-  const isInDashboard = !!dashCtx?.goBack;
 
   const handleCancel = () => {
-    if (isInDashboard) dashCtx.goBack();
-    else router.push("/reports");
+    router.push("/reports");
   };
 
   const handleSuccess = () => {
-    if (isInDashboard) dashCtx.setView("reports");
-    else router.push("/reports");
+    router.push("/reports");
   };
 
-  // ── DB-fetched data ──────────────────────────────────────────────────────
   const [communities, setCommunities] = useState([]);
   const [communitiesLoading, setCommunitiesLoading] = useState(true);
   const [locations, setLocations] = useState([]);
   const [locationsLoading, setLocationsLoading] = useState(false);
 
-  // ── Form state — maps 1:1 to sanitation_reports columns ─────────────────
   const [form, setForm] = useState({
-    issueType:         "",   // issue_type
-    severity:          "",   // severity
-    description:       "",   // description
-    healthRisk:        false,// health_risk
-    affectedCount:     "",   // affected_people_count
-    affectedChildren:  "",   // affected_children_count
-    locationType:      "",   // location_type
-    community:         "",   // community_id (resolved by name)
-    location:          "",   // location_id (resolved by name)
-    phone:             "",   // reporter_phone
-    isAnonymous:       false,// is_anonymous
+    issueType:         "",
+    severity:          "",
+    description:       "",
+    healthRisk:        false,
+    affectedCount:     "",
+    affectedChildren:  "",
+    locationType:      "",
+    community:         "",
+    location:          "",
+    phone:             "",
+    isAnonymous:       false,
   });
 
   const [photos, setPhotos] = useState([]);
@@ -434,12 +424,10 @@ export default function ReportForm() {
 
   const set = (key) => (val) => setForm((f) => ({ ...f, [key]: val }));
 
-  // ── Pre-fill phone from profile ──────────────────────────────────────────
   useEffect(() => {
     if (profile?.phone) set("phone")(profile.phone);
   }, [profile]);
 
-  // ── Fetch communities on mount ───────────────────────────────────────────
   useEffect(() => {
     async function fetchCommunities() {
       const { data, error } = await supabase
@@ -456,7 +444,6 @@ export default function ReportForm() {
     fetchCommunities();
   }, []);
 
-  // ── Fetch locations when community changes ───────────────────────────────
   useEffect(() => {
     set("location")("");
     setLocations([]);
@@ -488,7 +475,6 @@ export default function ReportForm() {
     return `SR-${timestamp}-${random}`;
   };
 
-  // ── Upload photos to Supabase Storage ────────────────────────────────────
   const uploadPhotos = async (referenceId) => {
     const urls = [];
     for (let i = 0; i < photos.length; i++) {
@@ -511,7 +497,6 @@ export default function ReportForm() {
     return urls;
   };
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     if (!form.issueType)    return toast.error("Please select an issue type");
     if (!form.severity)     return toast.error("Please select a severity level");
@@ -527,18 +512,14 @@ export default function ReportForm() {
     try {
       const referenceId = generateReferenceId();
 
-      // Resolve community_id
       const community = communities.find((c) => c.name === form.community);
       const communityId = community?.id ?? null;
 
-      // Resolve location_id
       const location = locations.find((l) => l.name === form.location);
       const locationId = location?.id ?? null;
 
-      // Upload photos (non-blocking per photo)
       const uploadedUrls = await uploadPhotos(referenceId);
 
-      // Insert report — only schema columns
       const { error } = await supabase.from("sanitation_reports").insert({
         reference_id:           referenceId,
         issue_type:             form.issueType,
@@ -558,7 +539,6 @@ export default function ReportForm() {
 
       if (error) throw error;
 
-      // Link photos to location_images if location resolved
       if (locationId && uploadedUrls.length > 0) {
         const imageRows = uploadedUrls.map((url) => ({
           location_id:  locationId,
@@ -581,8 +561,8 @@ export default function ReportForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen  py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Submit a report</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -590,9 +570,8 @@ export default function ReportForm() {
           </p>
         </div>
 
-        <div className="bg-white rounded-sm border border-gray-200 p-6 space-y-0">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-0">
 
-          {/* ── Incident Details ── */}
           <div>
             <SectionLabel icon={AlertTriangle}>Incident details</SectionLabel>
 
@@ -685,7 +664,6 @@ export default function ReportForm() {
 
           <Divider />
 
-          {/* ── Photo Evidence ── */}
           <div>
             <SectionLabel icon={Camera}>Photo evidence</SectionLabel>
             <CameraSection photos={photos} setPhotos={setPhotos} />
@@ -693,7 +671,6 @@ export default function ReportForm() {
 
           <Divider />
 
-          {/* ── Location ── */}
           <div>
             <SectionLabel icon={MapPin}>Location</SectionLabel>
 
@@ -725,7 +702,6 @@ export default function ReportForm() {
 
           <Divider />
 
-          {/* ── Reporter ── */}
           <div>
             <SectionLabel icon={User}>Reporter</SectionLabel>
 
@@ -754,7 +730,6 @@ export default function ReportForm() {
 
           <Divider />
 
-          {/* ── Submit ── */}
           <div className="flex items-center justify-between flex-wrap gap-3">
             <span className="flex items-center gap-1.5 text-xs text-gray-400">
               <Hash size={12} />

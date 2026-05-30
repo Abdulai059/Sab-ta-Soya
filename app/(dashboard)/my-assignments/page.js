@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MapPin, AlertTriangle, Clock, Inbox, Wifi, WifiOff, Check, X, History as HistoryIcon, Play, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -12,7 +13,6 @@ import { useAcceptAssignment } from "@/hooks/useAcceptAssignment";
 import { useDeclineAssignment } from "@/hooks/useDeclineAssignment";
 import { useStartWork } from "@/hooks/useStartWork";
 import { useCompleteWork } from "@/hooks/useCompleteWork";
-import { useDashboardView } from "@/context/DashboardViewContext";
 import { useAssignmentHistory } from "@/hooks/useAssignmentHistory";
 import { calculateAssignmentStats } from "@/utils/assignmentStats";
 import HistoryFilters from "@/components/assignment/HistoryFilters";
@@ -20,6 +20,7 @@ import HistoryCard from "@/components/assignment/HistoryCard";
 
 export default function MyAssignmentsPage() {
   const { profile } = useAuth();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const canViewAssigned = useHasPermission(REPORTS.VIEW_ASSIGNED);
   const [connectionStatus, setConnectionStatus] = useState('connected');
@@ -27,7 +28,6 @@ export default function MyAssignmentsPage() {
   const [declineReason, setDeclineReason] = useState('');
   const [historyFilter, setHistoryFilter] = useState('all');
   const [historySortOrder, setHistorySortOrder] = useState('newest');
-  const { setView } = useDashboardView();
   
   const acceptMutation = useAcceptAssignment();
   const declineMutation = useDeclineAssignment();
@@ -166,7 +166,7 @@ export default function MyAssignmentsPage() {
   
   if (!canViewAssigned) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Access Denied
@@ -303,7 +303,7 @@ export default function MyAssignmentsPage() {
             {startWorkMutation.isPending ? 'Starting...' : 'Start Work'}
           </button>
           <button
-            onClick={() => setView("reportDetail", { id: report.id })}
+            onClick={() => router.push(`/reports/${report.id}`)}
             className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
           >
             View
@@ -322,7 +322,7 @@ export default function MyAssignmentsPage() {
             {completeWorkMutation.isPending ? 'Completing...' : 'Mark Complete'}
           </button>
           <button
-            onClick={() => setView("reportDetail", { id: report.id })}
+            onClick={() => router.push(`/reports/${report.id}`)}
             className="px-3 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-300"
           >
             View
@@ -333,7 +333,7 @@ export default function MyAssignmentsPage() {
   );
   
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto py-6 space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

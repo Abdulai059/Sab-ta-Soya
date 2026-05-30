@@ -41,10 +41,8 @@ export default function ProtectedRoute({
     }
   }, [user, profile, loading, permissions, roles, hasRequiredPermissions, router]);
 
-  // While auth resolves, render nothing — the shell already shows the skeleton
   if (loading) return null;
 
-  // Not logged in — redirect in flight
   if (!user) return null;
 
   if (permissions.length > 0 && !hasRequiredPermissions) return null;

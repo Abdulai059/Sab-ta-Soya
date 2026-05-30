@@ -1,14 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useDashboardView } from "@/context/DashboardViewContext";
 import { usePermissions } from "@/hooks/usePermissions";
 
 import {
   DASHBOARD,
   REPORTS,
   MAP,
-  SETTINGS,
   USERS,
   ROLES,
   ROLE_METADATA,
@@ -19,7 +19,6 @@ import {
   ClipboardList,
   Map as MapIcon,
   FileEdit,
-  Settings,
   LogOut,
   Shield,
   Landmark,
@@ -37,10 +36,9 @@ const NAV_GROUPS = [
       {
         id: "analytics",
         label: "Analytics",
-        view: "analytics",
+        href: "/admin/analytics",
         icon: LayoutDashboard,
         permission: DASHBOARD.VIEW_ADMIN_PANEL,
-        type: "view",
       },
     ],
   },
@@ -50,34 +48,30 @@ const NAV_GROUPS = [
       {
         id: "reports",
         label: "Reports",
-        view: "reports",
+        href: "/reports",
         icon: ClipboardList,
         permission: REPORTS.VIEW_ALL,
-        type: "view",
       },
       {
         id: "my-assignments",
         label: "My Assignments",
-        view: "my-assignments",
+        href: "/my-assignments",
         icon: Briefcase,
         permission: REPORTS.VIEW_ASSIGNED,
-        type: "view",
       },
       {
         id: "live-map",
         label: "Live Map",
-        view: "map",
+        href: "/maps",
         icon: MapIcon,
         permission: MAP.VIEW,
-        type: "view",
       },
       {
         id: "submit-issue",
         label: "Submit Issue",
-        view: "submit",
+        href: "/reporteissue",
         icon: FileEdit,
         permission: REPORTS.CREATE,
-        type: "view",
       },
     ],
   },
@@ -87,34 +81,30 @@ const NAV_GROUPS = [
       {
         id: "users",
         label: "Users",
-        view: "users",
+        href: "/admin",
         icon: Users,
         permission: DASHBOARD.VIEW_ADMIN_PANEL,
-        type: "view",
       },
       {
         id: "district",
         label: "District Panel",
-        view: "district",
+        href: "/district-officer",
         icon: Landmark,
         permission: DASHBOARD.VIEW_DISTRICT_PANEL,
-        type: "view",
       },
       {
         id: "ngo",
         label: "NGO Portal",
-        view: "ngo",
+        href: "/ngo",
         icon: Handshake,
         permission: DASHBOARD.VIEW_NGO_PORTAL,
-        type: "view",
       },
       {
         id: "operator",
         label: "Operator",
-        view: "operator",
+        href: "/operator",
         icon: Shield,
         permission: DASHBOARD.VIEW_OPERATOR_PANEL,
-        type: "view",
       },
     ],
   },
@@ -124,9 +114,8 @@ const NAV_GROUPS = [
       {
         id: "profile",
         label: "Profile",
-        view: "profile",
+        href: "/profile",
         icon: UserCircle,
-        type: "view",
       },
     ],
   },
@@ -134,7 +123,7 @@ const NAV_GROUPS = [
 
 export default function DashboardSidebar({ open, onClose }) {
   const { profile, signOut, loading: authLoading } = useAuth();
-  const { activeView, setView } = useDashboardView();
+  const pathname = usePathname();
   const userPermissions = usePermissions();
 
   const hasPermission = (permission) => userPermissions.includes(permission);
@@ -146,9 +135,7 @@ export default function DashboardSidebar({ open, onClose }) {
   const filteredGroups = NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter(
-      (item) =>
-        (!item.permission || hasPermission(item.permission)) &&
-        (!item.excludePermission || !hasPermission(item.excludePermission))
+      (item) => !item.permission || hasPermission(item.permission)
     ),
   })).filter((g) => g.items.length > 0);
 
@@ -188,11 +175,12 @@ export default function DashboardSidebar({ open, onClose }) {
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = activeView === item.view;
+                  const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
                   return (
-                    <button
+                    <Link
                       key={item.id}
-                      onClick={() => { setView(item.view); onClose(); }}
+                      href={item.href}
+                      onClick={onClose}
                       className={`
                         group w-full flex items-center gap-3
                         px-3 py-2.5 rounded-xl text-sm font-medium
@@ -203,9 +191,9 @@ export default function DashboardSidebar({ open, onClose }) {
                         }
                       `}
                     >
-                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-gray-800" : "text-gray-400  group-hover:text-gray-600"}`} />
+                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-gray-800" : "text-gray-400 group-hover:text-gray-600"}`} />
                       <span className="flex-1 text-left truncate">{item.label}</span>
-                    </button>
+                    </Link>
                   );
                 })}
               </div>

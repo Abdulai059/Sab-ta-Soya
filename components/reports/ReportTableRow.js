@@ -2,7 +2,6 @@ import { Eye, Lock, MapPin, User, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { navigateTo } from "@/utils/navigateTo";
-import { useDashboardView } from "@/context/DashboardViewContext";
 
 const SEVERITY_STYLES = {
   critical: "bg-red-50 text-red-700 border-red-200",
@@ -91,15 +90,10 @@ function WorkerCell({ worker, status }) {
 }
 
 export default function ReportTableRow({ report, profile, formatTimeAgo }) {
-  const router  = useRouter();
-  const dashCtx = useDashboardView();
+  const router = useRouter();
 
   const handleView = () => {
-    if (dashCtx?.setView) {
-      dashCtx.setView("reportDetail", { id: report.id });
-    } else {
-      router.push(`/reports/${report.id}`);
-    }
+    router.push(`/reports/${report.id}`);
   };
 
   const severityCls = SEVERITY_STYLES[report.severity?.toLowerCase()] ?? FALLBACK_STYLE;

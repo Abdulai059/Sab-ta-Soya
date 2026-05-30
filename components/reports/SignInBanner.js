@@ -4,7 +4,7 @@ export default function SignInBanner() {
   const router = useRouter();
 
   return (
-    <div className="mt-6 bg-sky-50 ounded-xl p-6">
+    <div className="mt-6 bg-white ounded-xl p-6">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">

@@ -1,11 +1,11 @@
 "use client";
 
 import { X, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { SEVERITY_COLORS } from "./constants";
 import { formatDate } from "./utils";
-import { useDashboardView } from "@/context/DashboardViewContext";
 import { QUERY_KEYS } from "@/lib/realtimeInvalidator";
 
 const DONE_STATUSES = ["disposed", "verified"];
@@ -40,7 +40,7 @@ function CasesSkeleton() {
 }
 
 export default function ViewCasesModal({ worker, onClose }) {
-  const { setView } = useDashboardView();
+  const router = useRouter();
 
   const { data: cases = [], isLoading: loading } = useQuery({
     queryKey: QUERY_KEYS.workerCases(worker.id),
@@ -49,7 +49,7 @@ export default function ViewCasesModal({ worker, onClose }) {
   });
 
   const handleViewReport = (reportId) => {
-    setView("reportDetail", { id: reportId });
+    router.push(`/reports/${reportId}`);
     onClose();
   };
 

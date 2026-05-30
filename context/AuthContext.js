@@ -122,7 +122,6 @@ export const AuthProvider = ({ children }) => {
           const profileData = await fetchProfile(session.user.id);
 
           if (event === "SIGNED_IN" && profileData) {
-            // redirect handled by login page
           }
         } else {
           setUser(null);
