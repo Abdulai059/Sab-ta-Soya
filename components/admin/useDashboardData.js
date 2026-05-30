@@ -11,7 +11,9 @@ import {
 } from "./constants";
 import { daysAgo, buildInitials, formatDate } from "./utils";
 
-const DONE_STATUSES = ["disposed", "verified"];
+const DONE_STATUSES     = ["disposed", "verified"];
+const TERMINAL_STATUSES = ["disposed", "verified", "cancelled"];
+const ACTIVE_STATUSES   = ["pending", "assigned", "in_progress"];
 
 const RISK_FACTORS = [
   { key: "near_school",         label: "Near School",       points: 15 },
@@ -79,14 +81,16 @@ async function fetchRecentReports() {
     .from("sanitation_reports")
     .select("id, issue_type, severity, status, created_at, reference_id")
     .order("created_at", { ascending: false })
-    .limit(2);
+    .limit(10);
   if (error) throw error;
   return data ?? [];
 }
 
 const normalizeStatus = (report) => (report.status || "").toLowerCase().trim();
 const isDone          = (report) => DONE_STATUSES.includes(normalizeStatus(report));
+const isTerminal      = (report) => TERMINAL_STATUSES.includes(normalizeStatus(report));
 const isPending       = (report) => normalizeStatus(report) === "pending";
+const isActive        = (report) => ACTIVE_STATUSES.includes(normalizeStatus(report));
 
 const countBy = (arr, key) =>
   arr.reduce((acc, item) => {
@@ -99,15 +103,15 @@ const sumStatusKeys = (statusCounts, keys) =>
 
 function buildMetrics(reports, sevenDaysAgo, yesterday) {
   const total    = reports.length;
-  const open     = reports.filter(isPending).length;
+  const open     = reports.filter(isActive).length;
   const resolved = reports.filter(isDone).length;
 
   const totalInLastWeek    = reports.filter((r) => new Date(r.created_at) >= sevenDaysAgo).length;
-  const openSinceYesterday = reports.filter((r) => isPending(r) && new Date(r.created_at) >= yesterday).length;
+  const openSinceYesterday = reports.filter((r) => isActive(r) && new Date(r.created_at) >= yesterday).length;
   const resolvedInLastWeek = reports.filter((r) => isDone(r) && new Date(r.created_at) >= sevenDaysAgo).length;
 
   const responseTimes = reports
-    .filter(isDone)
+    .filter(isTerminal)
     .map((r) => (new Date(r.updated_at) - new Date(r.created_at)) / 36e5)
     .filter((h) => h > 0);
 
@@ -193,13 +197,13 @@ function buildWorkers(resolvedReports) {
     }));
 }
 
-async function fetchDashboard() {
-  const thirtyDaysAgo = daysAgo(30);
-  const sevenDaysAgo  = daysAgo(7);
-  const yesterday     = daysAgo(1);
+async function fetchDashboard(windowDays) {
+  const windowStart  = daysAgo(windowDays);
+  const sevenDaysAgo = daysAgo(7);
+  const yesterday    = daysAgo(1);
 
   const [reports, riskRows, resolvedReports, recentReports] = await Promise.all([
-    fetchReports(thirtyDaysAgo),
+    fetchReports(windowStart),
     fetchRiskAssessments(),
     fetchResolvedReports(),
     fetchRecentReports(),
@@ -215,13 +219,14 @@ async function fetchDashboard() {
     riskScoring:   buildRiskScoring(riskRows),
     workers:       buildWorkers(resolvedReports),
     recentReports,
+    windowDays,
   };
 }
 
-export function useDashboardData() {
+export function useDashboardData(windowDays = 30) {
   const { data = EMPTY_STATE, isLoading: loading } = useQuery({
     queryKey:             QUERY_KEYS.dashboard,
-    queryFn:              fetchDashboard,
+    queryFn:              () => fetchDashboard(windowDays),
     staleTime:            60_000,
     gcTime:               5 * 60_000,
     refetchOnWindowFocus: false,

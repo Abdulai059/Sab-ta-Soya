@@ -175,7 +175,10 @@ export default function DashboardSidebar({ open, onClose }) {
               <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                  const isActive =
+                    item.id === "users"
+                      ? pathname === item.href
+                      : pathname === item.href || pathname?.startsWith(item.href + "/");
                   return (
                     <Link
                       key={item.id}

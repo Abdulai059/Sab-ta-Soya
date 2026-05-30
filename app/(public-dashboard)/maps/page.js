@@ -1,8 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 import { useMapData } from "@/hooks/useMapData";
@@ -15,6 +14,7 @@ import MapHeader from "@/components/maps/MapHeader";
 import MapFooter from "@/components/maps/MapFooter";
 import MapLoadingScreen from "@/components/maps/MapLoadingScreen";
 import MapRightPanel from "@/components/maps/MapRightPanel";
+import DeepLinkHandler from "@/components/maps/DeepLinkHandler";
 
 import LocationSlugs from "@/components/maps/LocationSlugs";
 
@@ -32,27 +32,6 @@ const MapView = dynamic(() => import("@/components/maps/MapView"), {
     </div>
   ),
 });
-
-function DeepLinkHandler({ setActiveLocation }) {
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const lat = parseFloat(searchParams.get("lat"));
-    const lng = parseFloat(searchParams.get("lng"));
-    const name = searchParams.get("name");
-
-    if (!isNaN(lat) && !isNaN(lng)) {
-      setActiveLocation({
-        id: `shared-${lat}-${lng}`,
-        name: name ? decodeURIComponent(name) : "Shared Location",
-        coords: [lat, lng],
-        color: "#4285F4",
-      });
-    }
-  }, [searchParams, setActiveLocation]);
-
-  return null;
-}
 
 export default function MapsPage() {
   const { profile } = useAuth();
@@ -155,9 +134,7 @@ export default function MapsPage() {
 
   return (
     <div className="flex flex-col h-full w-full bg-white text-gray-900 font-['Syne',sans-serif] overflow-hidden">
-      <Suspense fallback={null}>
-        <DeepLinkHandler setActiveLocation={setActiveLocation} />
-      </Suspense>
+      <DeepLinkHandler setActiveLocation={setActiveLocation} />
 
       <div className="animate-slide-in-top relative z-9999">
         <MapHeader

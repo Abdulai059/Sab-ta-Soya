@@ -1,6 +1,6 @@
 import { Card } from "./DashboardCard";
 
-export default function MetricCard({ icon: Icon, iconBg, iconColor, label, value, delta, deltaUp }) {
+export default function MetricCard({ icon: Icon, iconBg, iconColor, label, value, delta, deltaUp, subtitle }) {
   return (
     <Card className="flex flex-col justify-between p-5 min-w-[160px]">
 
@@ -17,6 +17,7 @@ export default function MetricCard({ icon: Icon, iconBg, iconColor, label, value
 
   
       <p className="text-3xl font-semibold text-gray-800 leading-none mb-2">{value}</p>
+      {subtitle && <p className="text-[11px] text-gray-400 mt-0.5">{subtitle}</p>}
 
       {delta && (
         <p className={`text-xs font-medium ${deltaUp ? "text-red-500" : "text-emerald-500"}`}>

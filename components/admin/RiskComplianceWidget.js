@@ -6,16 +6,20 @@ import { CardTitle } from "./DashboardCard";
 function DonutChart({ segments }) {
   const r = 60, cx = 80, cy = 80, stroke = 28;
   const circumference = 2 * Math.PI * r;
+
+  const total = segments.reduce((s, d) => s + d.value, 0) || 1;
+  const pctOf = (v) => Math.round((v / total) * 100);
+  const maxValue = Math.max(...segments.map((s) => s.value), 0);
+  const centerPct = pctOf(maxValue) + "%";
+
   let offset = 0;
   const slices = segments.map((s) => {
-    const dash  = (s.value / 100) * circumference;
+    const dash  = (pctOf(s.value) / 100) * circumference;
     const gap   = circumference - dash;
     const slice = { ...s, dash, gap, offset };
     offset += dash;
     return slice;
   });
-
-  const donutTotal = segments.reduce((s, d) => s + d.value, 0) || 1;
 
   return (
     <svg width={160} height={160} viewBox="0 0 160 160">
@@ -31,7 +35,7 @@ function DonutChart({ segments }) {
           style={{ transform: "rotate(-90deg)", transformOrigin: "80px 80px" }}
         />
       ))}
-      <text x={cx} y={cy - 4} textAnchor="middle" fontSize="18" fontWeight="700" fill="#111">100%</text>
+      <text x={cx} y={cy - 4} textAnchor="middle" fontSize="18" fontWeight="700" fill="#111">{centerPct}</text>
       <text x={cx} y={cy + 14} textAnchor="middle" fontSize="10" fill="#888">overall</text>
     </svg>
   );
@@ -89,7 +93,7 @@ function LevelBadge({ level }) {
 
 const GAUGE_FILTERS = [
   { key: "compliant",    label: "Verified",  color: "text-green-500" },
-  { key: "pending",      label: "Resolved",  color: "text-amber-400" },
+  { key: "pending",      label: "Disposed",  color: "text-amber-400" },
   { key: "nonCompliant", label: "Cancelled", color: "text-red-500"   },
 ];
 
@@ -185,7 +189,7 @@ export default function RiskComplianceWidget({ data = {} }) {
             </div>
             <div>
               <div className="text-2xl font-bold text-amber-400">{gauge.pending}</div>
-              <div className="text-xs text-gray-400">Resolved · {pct(gauge.pending)}</div>
+              <div className="text-xs text-gray-400">Disposed · {pct(gauge.pending)}</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-red-500">{gauge.nonCompliant}</div>
@@ -197,7 +201,10 @@ export default function RiskComplianceWidget({ data = {} }) {
 
       <div className="bg-white rounded-2xl p-5 shadow-sm w-[240px] shrink-0">
          <CardTitle>Recent Alerts</CardTitle>
-        <div className="flex flex-col gap-4">
+        <div
+          className="flex flex-col gap-4 overflow-y-auto pr-1"
+          style={{ maxHeight: "145px", scrollbarWidth: "thin", scrollbarColor: "#e5e7eb transparent" }}
+        >
           {alerts.length === 0 ? (
             <p className="text-xs text-gray-400 text-center py-4">No recent reports</p>
           ) : alerts.map((a) => (

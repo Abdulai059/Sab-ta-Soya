@@ -83,7 +83,7 @@ function ScoreBar({ scorePct, assessmentAvgPct }) {
             className="text-[9px] text-gray-400 whitespace-nowrap text-center leading-tight"
             style={{ marginTop: 4 }}
           >
-            ASSESSMENT AVG
+            WEEKLY RATE
           </div>
         </div>
       </div>

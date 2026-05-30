@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ShieldCheck, ClipboardList, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { useDashboardData } from "@/components/admin/useDashboardData";
+import { STATUS_CONFIG } from "@/components/admin/constants";
 import MetricCard from "@/components/admin/MetricCard";
 import RiskScoringChart from "@/components/admin/RiskScoringChart";
 import ViewCasesModal from "@/components/admin/ViewCasesModal";
@@ -16,13 +17,6 @@ const ASSET_COLORS = [
   "#b45309", "#be123c", "#15803d", "#c2410c",
 ];
 
-const STATUS_MAP = [
-  { name: "Pending",     key: "pending",     color: "#94a3b8" },
-  { name: "In Progress", key: "in_progress", color: "#f97316" },
-  { name: "Disposed",    key: "disposed",    color: "#22c55e" },
-  { name: "Verified",    key: "verified",    color: "#3b82f6" },
-  { name: "Cancelled",   key: "cancelled",   color: "#ef4444" },
-];
 
 export default function AuthorityDashboard() {
   const {
@@ -33,6 +27,7 @@ export default function AuthorityDashboard() {
     riskScoring,
     recentReports = [],
     loading,
+    windowDays,
   } = useDashboardData();
 
   const [selectedWorker, setSelectedWorker] = useState(null);
@@ -48,9 +43,9 @@ export default function AuthorityDashboard() {
     ? Math.round((metrics.resolved / metrics.total) * 100)
     : 0;
 
-  const assessmentAvgPct = metrics.total > 0
-    ? Math.round((metrics.resolvedInLastWeek / Math.max(metrics.totalInLastWeek, 1)) * 100)
-    : 0;
+  const assessmentAvgPct = Math.round(
+    (metrics.resolvedInLastWeek / Math.max(metrics.totalInLastWeek, 1)) * 100
+  );
 
   const assetData = issueTypes.map((t, i) => ({
     name:  t.type,
@@ -62,19 +57,17 @@ export default function AuthorityDashboard() {
     ? Math.round((metrics.totalInLastWeek / metrics.total) * 100)
     : 0;
 
-  const sprsData = STATUS_MAP.map(({ name, key, color }) => ({
-    name,
-    value: getSnapCount(key),
-    color,
+  const sprsData = STATUS_CONFIG.map((s) => ({
+    name:  s.label,
+    value: getSnapCount(s.keys[0]),
+    color: s.color,
   }));
-
-  const riskTotal = riskPriority.reduce((s, r) => s + r.value, 0) || 1;
 
   const widgetData = {
     date: new Date().toLocaleDateString(),
     donut: riskPriority.map((r) => ({
       label: r.name,
-      value: Math.round((r.value / riskTotal) * 100),
+      value: r.value,
       color: r.color,
     })),
     gauge: {
@@ -122,6 +115,7 @@ export default function AuthorityDashboard() {
           value={metrics.total}
           delta={`+${metrics.totalInLastWeek} this week`}
           deltaUp={false}
+          subtitle={`Last ${windowDays} days`}
         />
         <MetricCard
           icon={AlertTriangle}
@@ -131,6 +125,7 @@ export default function AuthorityDashboard() {
           value={metrics.open}
           delta={`+${metrics.openSinceYesterday} since yesterday`}
           deltaUp={true}
+          subtitle={`Last ${windowDays} days`}
         />
         <MetricCard
           icon={CheckCircle}

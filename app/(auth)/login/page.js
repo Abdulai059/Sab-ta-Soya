@@ -273,7 +273,7 @@ export default function LoginPage({ onCloseModal, onSwitchToSignUp }) {
     if (!result.error) {
       if (onCloseModal) onCloseModal();
       const roleRoutes = {
-        admin:             "/admin",
+        admin:             "/admin/analytics",
         district_officer:  "/district-officer",
         ngo:               "/ngo",
       };
